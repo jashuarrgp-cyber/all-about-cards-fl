@@ -65,7 +65,7 @@ Phase 1 adds the technical foundation while preserving the Phase 0 product direc
 
 ### Phase 1 prerequisites and commands
 
-- Supported Node.js version: 22 LTS.
+- Supported Node.js version: Node.js 20.20.2 or newer; CI uses Node.js 22 LTS.
 - Package manager: npm with `package-lock.json`.
 - Local database: PostgreSQL 15+ using `DATABASE_URL` from `.env`.
 - Install: `npm install`.
@@ -81,7 +81,7 @@ Phase 1 adds the technical foundation while preserving the Phase 0 product direc
 
 ### Phase 1 authentication and owner setup
 
-Phase 1 selects Auth.js/NextAuth with the Prisma adapter for provider-based sign-in, database-backed sessions, App Router support, and server-side session retrieval. Protected routes must enforce permissions on the server.
+Phase 1 selects NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with `@auth/prisma-adapter@2.10.0` for provider-based sign-in, database-backed sessions, App Router support, and server-side session retrieval. Protected routes must enforce permissions on the server.
 
 To promote the first owner, configure an auth provider, sign in once with the intended owner account, seed roles and permissions with `npm run db:seed`, then run `INITIAL_OWNER_EMAIL="owner@example.test" INITIAL_OWNER_CONFIRMATION="PROMOTE_INITIAL_OWNER" npm run owner:bootstrap`. The script refuses to assign an initial owner when one already exists.
 

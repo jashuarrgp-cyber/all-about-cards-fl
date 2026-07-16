@@ -26,9 +26,9 @@ Rationale: This avoids brittle or non-compliant integrations and allows implemen
 
 ## Phase 1 foundation decisions
 
-- Use Next.js App Router, React, strict TypeScript, Tailwind CSS, npm, and Node.js 22 LTS for the application foundation.
+- Use Next.js App Router, React, strict TypeScript, Tailwind CSS, npm, Node.js 20.20.2+ locally, and Node.js 22 LTS in CI for the application foundation.
 - Use Prisma with PostgreSQL and UUID identifiers for identity, access-control, and audit records.
-- Select Auth.js/NextAuth with the Prisma adapter for App Router compatibility, provider-based authentication, database sessions, and future MFA extensibility. Alternatives considered include custom credentials auth, Clerk, Auth0, and Supabase Auth.
+- Select NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with `@auth/prisma-adapter@2.10.0` for App Router compatibility, provider-based authentication, database sessions, and future MFA extensibility. Alternatives considered include custom credentials auth, Clerk, Auth0, and Supabase Auth.
 - Use centralized role and permission definitions plus server-side authorization helpers rather than scattered role-name comparisons.
 - Use Zod for environment, authentication-related, and owner-bootstrap validation.
 - Use structured logging with sensitive-field redaction.
