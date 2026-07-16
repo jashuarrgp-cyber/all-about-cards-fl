@@ -33,3 +33,7 @@ Deliver a dependable internal operations application that controls inventory, pu
 ## Boundary rule
 
 If a feature can change inventory, money, permissions, customer data, or audit history, it must be designed with server-side authorization, validation, decimal-safe persistence, transactions where needed, and test coverage.
+
+## Phase 1 scope note
+
+Phase 1 is foundational only: application shell, tooling, identity/access-control schema, audit foundation, owner bootstrap, tests, and CI. MVP business workflows remain planned for later phases.

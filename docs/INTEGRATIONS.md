@@ -23,3 +23,7 @@ Integrations will be adapter-based. Each provider should have a narrow interface
 ## Phase 0 status
 
 No integrations are implemented. This document defines future boundaries and fallback expectations.
+
+## Phase 1 integration status
+
+Phase 1 adds only authentication provider placeholders. It does not add TCGplayer, eBay, PSA, Stripe, marketplace, pricing, scraping, or production third-party integrations.

@@ -42,3 +42,9 @@
 ## Phase 0 status
 
 No application runtime architecture has been implemented. This document describes the intended direction only.
+
+## Phase 1 application foundation
+
+The Phase 1 scaffold adds a Next.js App Router application under `src/app`. Public routes are `/`, `/sign-in`, and `/unauthorized`; protected route shells are `/app` and `/admin`. Shared UI lives in `src/components`, centralized configuration in `src/config`, and server-focused helpers in `src/lib`.
+
+Protected pages must call server-side authorization helpers. Middleware or hidden UI controls are not sufficient authorization controls.

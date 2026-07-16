@@ -40,3 +40,7 @@
 - Add provider interfaces where official access exists.
 - Maintain manual and CSV fallbacks.
 - Expand reporting and automation.
+
+## Phase 1 status
+
+Phase 1 adds the application foundation. Later phases remain responsible for data/business foundations, internal inventory operations, sales, consignments, card-show checkout, ecommerce, payments, pricing, and provider integrations.

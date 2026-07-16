@@ -54,3 +54,7 @@ Build a business operating platform for All About Cards FL LLC that manages Pok√
 - Storefront implementation.
 - Credentials.
 - Marketplace integrations.
+
+## Phase 1 requirements update
+
+Phase 1 introduces a secure technical foundation and route shells while preserving all Phase 0 business requirements. The `/app` and `/admin` pages must communicate that operational modules will be added in later phases.

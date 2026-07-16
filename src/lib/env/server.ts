@@ -1,0 +1,12 @@
+import 'server-only';
+import { z } from 'zod';
+export const serverEnvSchema = z.object({
+  APP_URL: z.string().url(),
+  DATABASE_URL: z.string().url(),
+  AUTH_SECRET: z.string().min(32),
+  AUTH_GITHUB_ID: z.string().optional().default(''),
+  AUTH_GITHUB_SECRET: z.string().optional().default(''),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+  TEST_ENV: z.enum(['true', 'false']).default('false'),
+});
+export const serverEnv = serverEnvSchema.parse(process.env);

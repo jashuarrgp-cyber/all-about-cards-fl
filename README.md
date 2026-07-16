@@ -58,3 +58,33 @@ Critical MVP rules include never allowing negative inventory, preserving purchas
 ## Important constraints
 
 The platform must never expose internal cost basis or profit data on public pages. It must not create unofficial scraping integrations, must not invent TCGplayer, eBay, or PSA API access, and must use provider interfaces with manual or CSV fallbacks until official access is confirmed.
+
+## Phase 1 application foundation update
+
+Phase 1 adds the technical foundation while preserving the Phase 0 product direction and constraints. The repository now includes a Next.js App Router application shell, strict TypeScript configuration, Tailwind CSS, Prisma/PostgreSQL configuration, Zod validation, Auth.js/NextAuth planning and adapters, ESLint, Prettier, Vitest, Playwright, and GitHub Actions CI.
+
+### Phase 1 prerequisites and commands
+
+- Supported Node.js version: 22 LTS.
+- Package manager: npm with `package-lock.json`.
+- Local database: PostgreSQL 15+ using `DATABASE_URL` from `.env`.
+- Install: `npm install`.
+- Environment setup: `cp .env.example .env` and replace placeholder values with local development values.
+- Development: `npm run dev`.
+- Formatting: `npm run format` and `npm run format:check`.
+- Linting: `npm run lint`.
+- Type checking: `npm run typecheck`.
+- Prisma: `npm run prisma:format`, `npm run prisma:validate`, `npm run prisma:generate`, and `npm run db:seed`.
+- Tests: `npm test`, `npm run test:integration`, and `npm run test:e2e`.
+- Build: `npm run build`.
+- Dependency review: `npm run security:audit`.
+
+### Phase 1 authentication and owner setup
+
+Phase 1 selects Auth.js/NextAuth with the Prisma adapter for provider-based sign-in, database-backed sessions, App Router support, and server-side session retrieval. Protected routes must enforce permissions on the server.
+
+To promote the first owner, configure an auth provider, sign in once with the intended owner account, seed roles and permissions with `npm run db:seed`, then run `INITIAL_OWNER_EMAIL="owner@example.test" INITIAL_OWNER_CONFIRMATION="PROMOTE_INITIAL_OWNER" npm run owner:bootstrap`. The script refuses to assign an initial owner when one already exists.
+
+### Phase 1 limitations
+
+Phase 1 does not implement inventory, purchases, sales, orders, customers, consignments, ecommerce checkout, Stripe processing, point-of-sale workflows, card-show event management, marketplace synchronization, price collection, real credentials, or real customer data.
