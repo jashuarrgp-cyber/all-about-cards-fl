@@ -79,9 +79,14 @@ export const purchaseCreateSchema = z
     totalCost: money,
     notes: z.string().optional(),
     createdByUserId: uuid.optional(),
+    locationId: uuid,
+    ownershipType: z
+      .nativeEnum(InventoryOwnershipType)
+      .default(InventoryOwnershipType.COMPANY),
+    consignorId: uuid.optional(),
     lines: z.array(purchaseLineSchema).min(1),
   })
-  .passthrough();
+  .superRefine(validateOwnership);
 export const quantityReceiptSchema = z
   .object({
     ...ownershipFields,
