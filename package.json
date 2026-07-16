@@ -21,7 +21,10 @@
     "prisma:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "owner:bootstrap": "tsx scripts/bootstrap-owner.ts",
-    "security:audit": "npm audit --audit-level=moderate"
+    "security:audit": "npm audit --audit-level=moderate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "db:reset:test": "tsx scripts/reset-test-db.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.10.0",

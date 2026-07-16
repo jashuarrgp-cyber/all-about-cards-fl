@@ -33,3 +33,7 @@ Do not create unofficial scraping integrations. Do not invent TCGplayer, eBay, P
 ## Phase 1 security foundation
 
 Phase 1 uses NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with the Prisma adapter for provider authentication and database sessions. Phase 1 adds server-side authorization helpers, secure HTTP headers, environment validation, server-only boundaries, structured logging with redaction, safe redirect checks, and an intentional initial-owner bootstrap. Future phases must expand CSRF coverage, MFA enrollment, audit coverage, rate limiting, and webhook idempotency.
+
+## Phase 2 data security notes
+
+Internal cost basis, ownership type, consignor references, purchases, and movement history are treated as server-side business data. Phase 2 does not add public APIs or customer-facing inventory workflows. Seed data is synthetic only and local PostgreSQL credentials in Docker Compose are nonproduction examples.
