@@ -23,3 +23,13 @@ Rationale: Negative inventory, mismatched sale allocation, or lost cost history 
 Decision: The project will not implement unofficial scraping or assume TCGplayer, eBay, PSA, or other provider API access. Provider interfaces, manual entry, and CSV fallbacks will be planned instead.
 
 Rationale: This avoids brittle or non-compliant integrations and allows implementation to proceed without invented credentials or unsupported access.
+
+## Phase 1 foundation decisions
+
+- Use Next.js App Router, React, strict TypeScript, Tailwind CSS, npm, Node.js 20.20.2+ locally, and Node.js 22 LTS in CI for the application foundation.
+- Use Prisma with PostgreSQL and UUID identifiers for identity, access-control, and audit records.
+- Select NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with `@auth/prisma-adapter@2.10.0` for App Router compatibility, provider-based authentication, database sessions, and future MFA extensibility. Alternatives considered include custom credentials auth, Clerk, Auth0, and Supabase Auth.
+- Use centralized role and permission definitions plus server-side authorization helpers rather than scattered role-name comparisons.
+- Use Zod for environment, authentication-related, and owner-bootstrap validation.
+- Use structured logging with sensitive-field redaction.
+- Keep Phase 2 business workflows out of Phase 1.

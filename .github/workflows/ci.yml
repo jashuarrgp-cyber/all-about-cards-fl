@@ -1,0 +1,25 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main, phase-1-foundation]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      APP_URL: http://localhost:3000
+      DATABASE_URL: postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public
+      AUTH_SECRET: test-secret-value-with-at-least-32-chars
+      LOG_LEVEL: info
+      TEST_ENV: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm' }
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run prisma:validate
+      - run: npm test
+      - run: npm run build

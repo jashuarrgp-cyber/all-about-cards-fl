@@ -38,3 +38,7 @@ Database transactions are required for operations that change inventory, orders,
 ## Phase 0 status
 
 This is a planning document only. No Prisma schema or database migration has been created.
+
+## Phase 1 database foundation
+
+Phase 1 configures Prisma for PostgreSQL and adds only identity, access-control, and audit-log models: `User`, `Account`, `Session`, `VerificationToken`, `Role`, `Permission`, `UserRole`, `RolePermission`, and `AuditLog`. Inventory, purchasing, sales, customer, consignment, payment, and marketplace models remain deferred.

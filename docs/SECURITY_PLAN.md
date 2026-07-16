@@ -29,3 +29,7 @@ Protect inventory, customer, order, consignment, payment, cost, profit, and audi
 ## Integration policy
 
 Do not create unofficial scraping integrations. Do not invent TCGplayer, eBay, PSA, or other provider API access. Use explicit provider interfaces and manual or CSV fallbacks until official access and terms are confirmed.
+
+## Phase 1 security foundation
+
+Phase 1 uses NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with the Prisma adapter for provider authentication and database sessions. Phase 1 adds server-side authorization helpers, secure HTTP headers, environment validation, server-only boundaries, structured logging with redaction, safe redirect checks, and an intentional initial-owner bootstrap. Future phases must expand CSRF coverage, MFA enrollment, audit coverage, rate limiting, and webhook idempotency.
