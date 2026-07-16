@@ -48,3 +48,7 @@ No application runtime architecture has been implemented. This document describe
 The Phase 1 scaffold adds a Next.js App Router application under `src/app`. Public routes are `/`, `/sign-in`, and `/unauthorized`; protected route shells are `/app` and `/admin`. Shared UI lives in `src/components`, centralized configuration in `src/config`, and server-focused helpers in `src/lib`.
 
 Protected pages must call server-side authorization helpers. Middleware or hidden UI controls are not sufficient authorization controls.
+
+## Phase 2 inventory architecture
+
+The inventory domain is server-only and independent from route handlers or UI. Zod schemas validate Phase 2 inputs before Prisma writes. Mutations use serializable transactions and create `InventoryMovement` records inside the same transaction as inventory changes. Public pages do not expose cost, consignor, or profit information.

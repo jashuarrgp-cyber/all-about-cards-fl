@@ -44,3 +44,7 @@
 ## Phase 1 status
 
 Phase 1 adds the application foundation. Later phases remain responsible for data/business foundations, internal inventory operations, sales, consignments, card-show checkout, ecommerce, payments, pricing, and provider integrations.
+
+## Phase 2 completion scope
+
+Phase 2 establishes the database-backed business data foundation for catalog, inventory ownership, storage, purchases, cost basis, movement history, validation, seed data, and transaction-safe services. Phase 3 user-facing inventory workflows, sales, ecommerce, POS, pricing integrations, settlements, and marketplace syncing remain out of scope.

@@ -33,3 +33,11 @@ Rationale: This avoids brittle or non-compliant integrations and allows implemen
 - Use Zod for environment, authentication-related, and owner-bootstrap validation.
 - Use structured logging with sensitive-field redaction.
 - Keep Phase 2 business workflows out of Phase 1.
+
+## Phase 2 decisions
+
+- Use PostgreSQL as the only supported database for development, CI, and tests; SQLite is not used as a fallback.
+- Store cost basis and currency directly on inventory records so historical financial data survives catalog edits.
+- Keep movement history append-only and use restrictive foreign keys for inventory, purchase, and ledger records.
+- Use `Decimal(18,4)` for acquisition unit costs and `Decimal(18,2)` for purchase totals.
+- Defer sales orders, POS, ecommerce, settlements, scraping, pricing APIs, and marketplace integrations to later phases.

@@ -8,17 +8,19 @@ datasource db {
 }
 
 model User {
-  id            String     @id @default(uuid())
-  email         String     @unique
-  name          String?
-  image         String?
-  emailVerified DateTime?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  roles         UserRole[]
-  auditLogs     AuditLog[]
+  id                String              @id @default(uuid())
+  email             String              @unique
+  name              String?
+  image             String?
+  emailVerified     DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  accounts          Account[]
+  sessions          Session[]
+  roles             UserRole[]
+  auditLogs         AuditLog[]
+  Purchase          Purchase[]
+  InventoryMovement InventoryMovement[]
 }
 
 model Account {
@@ -114,4 +116,241 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([requestId])
   @@index([createdAt])
+}
+
+enum CatalogGame {
+  POKEMON
+  ONE_PIECE
+  OTHER
+}
+
+enum ProductType {
+  RAW_CARD
+  GRADED_CARD
+  SEALED_PRODUCT
+}
+
+enum InventoryOwnershipType {
+  COMPANY
+  CONSIGNMENT
+}
+
+enum InventoryStatus {
+  ACTIVE
+  RESERVED
+  SOLD
+  DAMAGED
+  RETURNED
+  ARCHIVED
+}
+
+enum PurchaseLineInventoryType {
+  QUANTITY
+  INDIVIDUAL
+}
+
+enum InventoryMovementType {
+  PURCHASE_RECEIPT
+  MANUAL_ADJUSTMENT_IN
+  MANUAL_ADJUSTMENT_OUT
+  TRANSFER
+  RESERVATION
+  RESERVATION_RELEASE
+  DAMAGE
+  RETURN
+  SALE_ALLOCATION
+}
+
+model CatalogProduct {
+  id                       String                    @id @default(uuid())
+  game                     CatalogGame
+  productType              ProductType
+  name                     String
+  setName                  String?
+  setCode                  String?
+  cardNumber               String?
+  rarity                   String?
+  language                 String?
+  finish                   String?
+  variant                  String?
+  manufacturer             String?
+  notes                    String?
+  externalReferences       Json?
+  archivedAt               DateTime?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  quantityInventoryLots    QuantityInventoryLot[]
+  individualInventoryItems IndividualInventoryItem[]
+  purchaseLines            PurchaseLine[]
+
+  @@index([game, productType])
+  @@index([setCode, cardNumber])
+  @@index([name])
+}
+
+model Consignor {
+  id                       String                    @id @default(uuid())
+  displayName              String                    @unique
+  email                    String?
+  phone                    String?
+  notes                    String?
+  archivedAt               DateTime?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  quantityInventoryLots    QuantityInventoryLot[]
+  individualInventoryItems IndividualInventoryItem[]
+}
+
+model StorageLocation {
+  id                       String                    @id @default(uuid())
+  code                     String                    @unique
+  name                     String
+  description              String?
+  archivedAt               DateTime?
+  parentLocationId         String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  parentLocation           StorageLocation?          @relation("LocationHierarchy", fields: [parentLocationId], references: [id], onDelete: Restrict)
+  childLocations           StorageLocation[]         @relation("LocationHierarchy")
+  quantityInventoryLots    QuantityInventoryLot[]
+  individualInventoryItems IndividualInventoryItem[]
+  movementsFrom            InventoryMovement[]       @relation("MovementFromLocation")
+  movementsTo              InventoryMovement[]       @relation("MovementToLocation")
+}
+
+model Purchase {
+  id                String              @id @default(uuid())
+  purchaseDate      DateTime
+  sourceName        String
+  sourceChannel     String?
+  externalReference String?
+  currency          String              @default("USD")
+  subtotal          Decimal             @db.Decimal(18, 2)
+  tax               Decimal             @default(0) @db.Decimal(18, 2)
+  shipping          Decimal             @default(0) @db.Decimal(18, 2)
+  fees              Decimal             @default(0) @db.Decimal(18, 2)
+  totalCost         Decimal             @db.Decimal(18, 2)
+  notes             String?
+  createdByUserId   String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  createdByUser     User?               @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+  lines             PurchaseLine[]
+  movements         InventoryMovement[]
+
+  @@index([purchaseDate])
+  @@index([createdByUserId])
+}
+
+model PurchaseLine {
+  id                       String                    @id @default(uuid())
+  purchaseId               String
+  productId                String
+  quantity                 Int
+  unitCost                 Decimal                   @db.Decimal(18, 4)
+  lineTotal                Decimal                   @db.Decimal(18, 2)
+  inventoryType            PurchaseLineInventoryType
+  notes                    String?
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  purchase                 Purchase                  @relation(fields: [purchaseId], references: [id], onDelete: Restrict)
+  product                  CatalogProduct            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  quantityInventoryLots    QuantityInventoryLot[]
+  individualInventoryItems IndividualInventoryItem[]
+  movements                InventoryMovement[]
+
+  @@index([purchaseId])
+  @@index([productId])
+}
+
+model QuantityInventoryLot {
+  id                  String                 @id @default(uuid())
+  productId           String
+  ownershipType       InventoryOwnershipType
+  consignorId         String?
+  locationId          String
+  quantityOnHand      Int
+  quantityReserved    Int                    @default(0)
+  acquisitionUnitCost Decimal                @db.Decimal(18, 4)
+  purchaseLineId      String?
+  currency            String                 @default("USD")
+  status              InventoryStatus        @default(ACTIVE)
+  version             Int                    @default(0)
+  archivedAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  product             CatalogProduct         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  consignor           Consignor?             @relation(fields: [consignorId], references: [id], onDelete: Restrict)
+  location            StorageLocation        @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  purchaseLine        PurchaseLine?          @relation(fields: [purchaseLineId], references: [id], onDelete: Restrict)
+  movements           InventoryMovement[]
+
+  @@index([productId])
+  @@index([locationId])
+  @@index([ownershipType])
+  @@index([status])
+}
+
+model IndividualInventoryItem {
+  id                  String                 @id @default(uuid())
+  productId           String
+  ownershipType       InventoryOwnershipType
+  consignorId         String?
+  locationId          String
+  status              InventoryStatus        @default(ACTIVE)
+  acquisitionCost     Decimal                @db.Decimal(18, 4)
+  purchaseLineId      String?
+  currency            String                 @default("USD")
+  internalInventoryId String?                @unique
+  notes               String?
+  gradingCompany      String?
+  grade               String?
+  certificationNumber String?
+  gradingQualifier    String?
+  gradingLabelDetails String?
+  archivedAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  product             CatalogProduct         @relation(fields: [productId], references: [id], onDelete: Restrict)
+  consignor           Consignor?             @relation(fields: [consignorId], references: [id], onDelete: Restrict)
+  location            StorageLocation        @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  purchaseLine        PurchaseLine?          @relation(fields: [purchaseLineId], references: [id], onDelete: Restrict)
+  movements           InventoryMovement[]
+
+  @@unique([gradingCompany, certificationNumber])
+  @@index([productId])
+  @@index([locationId])
+  @@index([ownershipType])
+  @@index([status])
+  @@index([gradingCompany, certificationNumber])
+}
+
+model InventoryMovement {
+  id                        String                   @id @default(uuid())
+  movementType              InventoryMovementType
+  quantityDelta             Int?
+  quantityInventoryLotId    String?
+  individualInventoryItemId String?
+  fromLocationId            String?
+  toLocationId              String?
+  relatedPurchaseId         String?
+  relatedPurchaseLineId     String?
+  actingUserId              String?
+  occurredAt                DateTime                 @default(now())
+  notes                     String?
+  externalReference         String?
+  idempotencyKey            String?                  @unique
+  createdAt                 DateTime                 @default(now())
+  quantityInventoryLot      QuantityInventoryLot?    @relation(fields: [quantityInventoryLotId], references: [id], onDelete: Restrict)
+  individualInventoryItem   IndividualInventoryItem? @relation(fields: [individualInventoryItemId], references: [id], onDelete: Restrict)
+  fromLocation              StorageLocation?         @relation("MovementFromLocation", fields: [fromLocationId], references: [id], onDelete: Restrict)
+  toLocation                StorageLocation?         @relation("MovementToLocation", fields: [toLocationId], references: [id], onDelete: Restrict)
+  relatedPurchase           Purchase?                @relation(fields: [relatedPurchaseId], references: [id], onDelete: Restrict)
+  relatedPurchaseLine       PurchaseLine?            @relation(fields: [relatedPurchaseLineId], references: [id], onDelete: Restrict)
+  actingUser                User?                    @relation(fields: [actingUserId], references: [id], onDelete: SetNull)
+
+  @@index([occurredAt])
+  @@index([quantityInventoryLotId])
+  @@index([individualInventoryItemId])
+  @@index([movementType])
 }

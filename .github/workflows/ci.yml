@@ -2,10 +2,23 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, phase-1-foundation]
+    branches: [main, codex/phase-2-data-foundation]
 jobs:
   validate:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aacfl
+          POSTGRES_PASSWORD: aacfl
+          POSTGRES_DB: aacfl_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       APP_URL: http://localhost:3000
       DATABASE_URL: postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public
@@ -20,6 +33,11 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run typecheck
+      - run: npm run prisma:format
       - run: npm run prisma:validate
+      - run: npm run prisma:generate
+      - run: npm run prisma:migrate:deploy
       - run: npm test
+      - run: npm run test:integration
       - run: npm run build
+      - run: npm run security:audit

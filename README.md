@@ -88,3 +88,7 @@ To promote the first owner, configure an auth provider, sign in once with the in
 ### Phase 1 limitations
 
 Phase 1 does not implement inventory, purchases, sales, orders, customers, consignments, ecommerce checkout, Stripe processing, point-of-sale workflows, card-show event management, marketplace synchronization, price collection, real credentials, or real customer data.
+
+## Phase 2 local PostgreSQL workflow
+
+Start a nonproduction local database with `docker compose up -d postgres`, then set `DATABASE_URL=postgresql://aacfl:aacfl_local_only@localhost:5432/aacfl_dev?schema=public`. Apply migrations with `npm run prisma:migrate:deploy`, generate Prisma Client with `npm run prisma:generate`, and load synthetic idempotent seed data with `npm run db:seed`. Run database-backed integration tests against an isolated test database using `npm run test:integration`. Stop local PostgreSQL with `docker compose down`; add `-v` only when you intentionally want to delete local development data.
