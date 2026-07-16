@@ -48,18 +48,27 @@ export async function receivePurchaseIntoInventory(
     async (tx) => {
       const purchase = await tx.purchase.create({
         data: {
-          ...data,
+          purchaseDate: data.purchaseDate,
+          sourceName: data.sourceName,
+          sourceChannel: data.sourceChannel,
+          externalReference: data.externalReference,
+          currency: data.currency,
           subtotal: toDecimal(data.subtotal),
           tax: toDecimal(data.tax),
           shipping: toDecimal(data.shipping),
           fees: toDecimal(data.fees),
           totalCost: toDecimal(data.totalCost),
+          notes: data.notes,
+          createdByUserId: data.createdByUserId,
           lines: {
-            create: data.lines.map((l) => ({
-              ...l,
-              unitCost: toDecimal(l.unitCost),
-              lineTotal: toDecimal(l.lineTotal),
-              inventoryType: l.inventoryType as PurchaseLineInventoryType,
+            create: data.lines.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity,
+              unitCost: toDecimal(line.unitCost),
+              lineTotal: toDecimal(line.lineTotal),
+              inventoryType:
+                line.inventoryType as PurchaseLineInventoryType,
+              notes: line.notes,
             })),
           },
         },
