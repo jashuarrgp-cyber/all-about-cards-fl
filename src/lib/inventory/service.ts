@@ -66,8 +66,7 @@ export async function receivePurchaseIntoInventory(
               quantity: line.quantity,
               unitCost: toDecimal(line.unitCost),
               lineTotal: toDecimal(line.lineTotal),
-              inventoryType:
-                line.inventoryType as PurchaseLineInventoryType,
+              inventoryType: line.inventoryType as PurchaseLineInventoryType,
               notes: line.notes,
             })),
           },
