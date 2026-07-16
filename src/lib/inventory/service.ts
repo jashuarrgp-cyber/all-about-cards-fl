@@ -83,7 +83,7 @@ export async function receivePurchaseIntoInventory(
               ownershipType: data.ownershipType,
               consignorId: data.consignorId,
               quantity: line.quantity,
-              acquisitionUnitCost: line.unitCost,
+              acquisitionUnitCost: line.unitCost.toString(),
               purchaseLineId: line.id,
               currency: purchase.currency,
             },
