@@ -41,3 +41,11 @@ Rationale: This avoids brittle or non-compliant integrations and allows implemen
 - Keep movement history append-only and use restrictive foreign keys for inventory, purchase, and ledger records.
 - Use `Decimal(18,4)` for acquisition unit costs and `Decimal(18,2)` for purchase totals.
 - Defer sales orders, POS, ecommerce, settlements, scraping, pricing APIs, and marketplace integrations to later phases.
+
+## Phase 3 secure internal inventory operations
+
+- Added an authenticated internal workspace route family under `/app` for catalog, inventory, purchases, locations, movement history, and audit history.
+- Phase 3 server permissions are explicit: catalog, inventory receive/adjust/transfer/reserve, purchase, location, movement, audit, and cost read scopes.
+- Cost-sensitive queries must use explicit Prisma `select` objects and only include cost fields when the authenticated session has `cost:read`.
+- Inventory mutations are designed around stable database IDs, serializable transaction boundaries, immutable movement history, and audit records.
+- Phase 3 remains internal-only: sales, checkout, ecommerce, Stripe, marketplace integrations, scraping, CSV import/export, and profit reporting stay out of scope for Phase 4+ planning.

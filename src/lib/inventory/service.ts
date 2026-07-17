@@ -197,7 +197,7 @@ export async function adjustQuantityInventory(
       });
       await tx.inventoryMovement.create({
         data: {
-          movementType: data.movementType,
+          movementType: data.reason,
           quantityDelta: data.quantityDelta,
           quantityInventoryLotId: lot.id,
           fromLocationId: data.quantityDelta < 0 ? lot.locationId : undefined,
@@ -230,6 +230,14 @@ export async function transferQuantityInventory(
       const from = await tx.quantityInventoryLot.findUniqueOrThrow({
         where: { id: data.lotId },
       });
+      if (from.locationId === data.toLocationId)
+        throw new Error('Source and destination locations must differ.');
+      const destination = await tx.storageLocation.findFirst({
+        where: { id: data.toLocationId, archivedAt: null },
+      });
+      if (!destination) throw new Error('Destination location must be active.');
+      if (from.quantityReserved > 0)
+        throw new Error('Reserved inventory cannot be transferred.');
       if (from.quantityOnHand - from.quantityReserved < data.quantity)
         throw new Error('Insufficient available inventory to transfer.');
       const target = await tx.quantityInventoryLot.create({
@@ -278,6 +286,12 @@ export async function transferIndividualItem(
       const item = await tx.individualInventoryItem.findUniqueOrThrow({
         where: { id: data.itemId },
       });
+      if (item.locationId === data.toLocationId)
+        throw new Error('Source and destination locations must differ.');
+      const destination = await tx.storageLocation.findFirst({
+        where: { id: data.toLocationId, archivedAt: null },
+      });
+      if (!destination) throw new Error('Destination location must be active.');
       const updated = await tx.individualInventoryItem.update({
         where: { id: item.id },
         data: { locationId: data.toLocationId },
@@ -347,7 +361,10 @@ export async function releaseReservedQuantity(
         where: { id: lot.id },
         data: {
           quantityReserved: { decrement: data.quantity },
-          status: InventoryStatus.ACTIVE,
+          status:
+            lot.quantityReserved === data.quantity
+              ? InventoryStatus.ACTIVE
+              : InventoryStatus.RESERVED,
           version: { increment: 1 },
         },
       });

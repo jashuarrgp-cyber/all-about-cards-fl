@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import {
   CatalogGame,
-  InventoryMovementType,
   InventoryOwnershipType,
   ProductType,
 } from '@prisma/client';
@@ -121,26 +120,31 @@ export const inventoryAdjustmentSchema = z.object({
     .number()
     .int()
     .refine((v) => v !== 0),
-  movementType: z.nativeEnum(InventoryMovementType),
-  notes: z.string().optional(),
+  reason: z.enum([
+    'MANUAL_ADJUSTMENT_IN',
+    'MANUAL_ADJUSTMENT_OUT',
+    'DAMAGE',
+    'RETURN',
+  ]),
+  notes: z.string().min(1),
   actingUserId: uuid.optional(),
 });
 export const quantityTransferSchema = z.object({
   lotId: uuid,
   toLocationId: uuid,
   quantity: z.number().int().positive(),
-  notes: z.string().optional(),
+  notes: z.string().min(1),
   actingUserId: uuid.optional(),
 });
 export const itemTransferSchema = z.object({
   itemId: uuid,
   toLocationId: uuid,
-  notes: z.string().optional(),
+  notes: z.string().min(1),
   actingUserId: uuid.optional(),
 });
 export const reservationSchema = z.object({
   lotId: uuid,
   quantity: z.number().int().positive(),
-  notes: z.string().optional(),
+  notes: z.string().min(1),
   actingUserId: uuid.optional(),
 });

@@ -54,3 +54,7 @@ Quantity lots hold fungible raw cards and sealed products. Individually tracked 
 Ownership is enforced at the database layer: company-owned inventory cannot reference a consignor, and consignment inventory must reference a consignor. Quantity constraints prevent negative on-hand and reserved quantities, and prevent reserved quantity from exceeding on-hand quantity. Movement rows must reference exactly one inventory target.
 
 Inventory-changing services run in Prisma transactions with serializable isolation. Receiving purchases, receiving serialized items, adjustments, transfers, reservations, and releases write movement history and sensitive mutations also write audit logs in the same transaction.
+
+## Phase 3 note: secure internal inventory operations
+
+Phase 3 adds the authenticated internal `/app` workspace for product catalog, quantity and individually tracked inventory, purchase/manual receiving, adjustments, transfers, reservations/releases, locations, immutable inventory movements, and restricted audit history. All pages and mutations must enforce server-side permissions independently of navigation visibility. Cost fields are selected only for users with `cost:read`; inventory is targeted by stable database IDs; inventory-changing workflows use transaction boundaries and concurrency-safe checks to prevent negative inventory and over-reservation. No Phase 4 sales, checkout, Stripe, ecommerce, marketplace, scraping, or profit-reporting work is included.

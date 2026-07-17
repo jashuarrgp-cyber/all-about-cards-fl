@@ -37,3 +37,7 @@ Phase 1 uses NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with the Prisma adapt
 ## Phase 2 data security notes
 
 Internal cost basis, ownership type, consignor references, purchases, and movement history are treated as server-side business data. Phase 2 does not add public APIs or customer-facing inventory workflows. Seed data is synthetic only and local PostgreSQL credentials in Docker Compose are nonproduction examples.
+
+## Phase 3 note: secure internal inventory operations
+
+Phase 3 adds the authenticated internal `/app` workspace for product catalog, quantity and individually tracked inventory, purchase/manual receiving, adjustments, transfers, reservations/releases, locations, immutable inventory movements, and restricted audit history. All pages and mutations must enforce server-side permissions independently of navigation visibility. Cost fields are selected only for users with `cost:read`; inventory is targeted by stable database IDs; inventory-changing workflows use transaction boundaries and concurrency-safe checks to prevent negative inventory and over-reservation. No Phase 4 sales, checkout, Stripe, ecommerce, marketplace, scraping, or profit-reporting work is included.

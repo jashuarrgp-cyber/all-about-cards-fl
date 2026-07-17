@@ -92,3 +92,7 @@ Phase 1 does not implement inventory, purchases, sales, orders, customers, consi
 ## Phase 2 local PostgreSQL workflow
 
 Start a nonproduction local database with `docker compose up -d postgres`, then set `DATABASE_URL=postgresql://aacfl:aacfl_local_only@localhost:5432/aacfl_dev?schema=public`. Apply migrations with `npm run prisma:migrate:deploy`, generate Prisma Client with `npm run prisma:generate`, and load synthetic idempotent seed data with `npm run db:seed`. Run database-backed integration tests against an isolated test database using `npm run test:integration`. Stop local PostgreSQL with `docker compose down`; add `-v` only when you intentionally want to delete local development data.
+
+## Phase 3 note: secure internal inventory operations
+
+Phase 3 adds the authenticated internal `/app` workspace for product catalog, quantity and individually tracked inventory, purchase/manual receiving, adjustments, transfers, reservations/releases, locations, immutable inventory movements, and restricted audit history. All pages and mutations must enforce server-side permissions independently of navigation visibility. Cost fields are selected only for users with `cost:read`; inventory is targeted by stable database IDs; inventory-changing workflows use transaction boundaries and concurrency-safe checks to prevent negative inventory and over-reservation. No Phase 4 sales, checkout, Stripe, ecommerce, marketplace, scraping, or profit-reporting work is included.
