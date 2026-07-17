@@ -18,7 +18,10 @@ import {
   inventoryFilterSchema,
   quantityLotSelect,
 } from '@/lib/inventory/queries';
-import { catalogFilterSchema } from '@/lib/catalog/queries';
+import {
+  catalogFilterSchema,
+  whereForCatalogFilters,
+} from '@/lib/catalog/queries';
 
 describe('Phase 3A permissions and query helpers', () => {
   it('maps internal read and cost permissions by role', () => {
@@ -43,9 +46,28 @@ describe('Phase 3A permissions and query helpers', () => {
   it('validates filters safely', () => {
     expect(catalogFilterSchema.parse({ game: 'POKEMON' }).game).toBe('POKEMON');
     expect(catalogFilterSchema.parse({ game: 'BAD' }).game).toBeUndefined();
+    expect(catalogFilterSchema.parse({}).archived).toBe('active');
     expect(
       inventoryFilterSchema.parse({ ownershipType: 'COMPANY' }).ownershipType,
     ).toBe('COMPANY');
+  });
+  it('builds archive filters explicitly', () => {
+    expect(whereForCatalogFilters(catalogFilterSchema.parse({}))).toMatchObject(
+      {
+        archivedAt: null,
+      },
+    );
+    expect(
+      whereForCatalogFilters(catalogFilterSchema.parse({ archived: 'active' })),
+    ).toMatchObject({ archivedAt: null });
+    expect(
+      whereForCatalogFilters(
+        catalogFilterSchema.parse({ archived: 'archived' }),
+      ),
+    ).toMatchObject({ archivedAt: { not: null } });
+    expect(
+      whereForCatalogFilters(catalogFilterSchema.parse({ archived: 'all' })),
+    ).not.toHaveProperty('archivedAt');
   });
   it('omits cost selections unless explicitly allowed', () => {
     expect(quantityLotSelect(false)).not.toHaveProperty('acquisitionUnitCost');

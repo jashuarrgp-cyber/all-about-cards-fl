@@ -8,12 +8,17 @@ export const catalogFilterSchema = z.object({
   q: z.string().trim().max(100).optional().catch(undefined),
   game: z.nativeEnum(CatalogGame).optional().catch(undefined),
   productType: z.nativeEnum(ProductType).optional().catch(undefined),
-  archived: z.enum(['active', 'archived', 'all']).optional().catch('active'),
+  archived: z
+    .enum(['active', 'archived', 'all'])
+    .catch('active')
+    .default('active'),
   page: z.unknown().optional(),
   pageSize: z.unknown().optional(),
 });
 export type CatalogFilters = z.infer<typeof catalogFilterSchema>;
-function whereFor(filters: CatalogFilters): Prisma.CatalogProductWhereInput {
+export function whereForCatalogFilters(
+  filters: CatalogFilters,
+): Prisma.CatalogProductWhereInput {
   const where: Prisma.CatalogProductWhereInput = {};
   if (filters.q) {
     where.OR = [
@@ -36,7 +41,7 @@ function whereFor(filters: CatalogFilters): Prisma.CatalogProductWhereInput {
 export async function listCatalogProducts(raw: Record<string, unknown>) {
   const filters = catalogFilterSchema.parse(raw);
   const pagination = parsePagination(filters);
-  const where = whereFor(filters);
+  const where = whereForCatalogFilters(filters);
   const [items, total] = await prisma.$transaction([
     prisma.catalogProduct.findMany({
       where,

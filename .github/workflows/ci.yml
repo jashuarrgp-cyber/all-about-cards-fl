@@ -43,7 +43,11 @@ jobs:
       - run: npm run db:seed
       - run: npm run test:unit
       - run: npm run test:integration
+      - run: npm run db:seed
       - run: npm run test:component
+      - run: npm run db:seed
+      - name: Verify Playwright seed data
+        run: npx tsx scripts/verify-e2e-seed.ts
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
       - run: npm run build

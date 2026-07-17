@@ -39,7 +39,6 @@ beforeEach(reset);
 
 afterAll(async () => {
   await reset();
-  await seed(prisma);
   await prisma.$disconnect();
 });
 
