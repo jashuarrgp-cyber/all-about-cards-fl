@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 const testIdentityCookieName = 'aacfl_test_identity';
+const seededCatalogProductName = 'Synthetic Electric Mouse';
+const seededInventorySearchTerm = 'Electric';
 
 async function signInAs(page: Page, identity: 'owner' | 'employee' | 'vendor') {
   await page.context().addCookies([
@@ -30,23 +32,25 @@ test('authorized owner can open dashboard, catalog, inventory, and details', asy
 
   await page.getByRole('link', { name: 'Open Catalog' }).click();
   await expect(page.getByRole('heading', { name: 'Catalog' })).toBeVisible();
-  await expect(page.getByText('Synthetic Electric Mouse')).toBeVisible();
-  await page.getByLabel('Keyword').fill('Electric');
+  await expect(page.getByText(seededCatalogProductName)).toBeVisible();
+  await page.getByLabel('Keyword').fill(seededInventorySearchTerm);
   await page.getByRole('button', { name: 'Apply' }).click();
   await expect(page).toHaveURL(/q=Electric/);
-  await page.getByRole('link', { name: /Synthetic Electric Mouse/ }).click();
+  await page
+    .getByRole('link', { name: new RegExp(seededCatalogProductName) })
+    .click();
   await expect(
-    page.getByRole('heading', { name: 'Synthetic Electric Mouse' }),
+    page.getByRole('heading', { name: seededCatalogProductName }),
   ).toBeVisible();
 
   await page.goto('/app/inventory');
   await expect(page.getByRole('heading', { name: 'Inventory' })).toBeVisible();
   await expect(page.getByText('Unit cost')).toBeVisible();
-  await page.getByLabel('Keyword').fill('Synthetic');
+  await page.getByLabel('Keyword').fill(seededInventorySearchTerm);
   await page.getByRole('button', { name: 'Apply' }).click();
-  await expect(page).toHaveURL(/q=Synthetic/);
+  await expect(page).toHaveURL(/q=Electric/);
   await page
-    .getByRole('link', { name: /Synthetic Electric Mouse/ })
+    .getByRole('link', { name: new RegExp(seededCatalogProductName) })
     .first()
     .click();
   await expect(

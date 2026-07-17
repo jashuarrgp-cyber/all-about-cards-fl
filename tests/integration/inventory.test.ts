@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import {
   adjustQuantityInventory,
   receivePurchaseIntoInventory,
@@ -36,6 +36,12 @@ async function base() {
 }
 
 beforeEach(reset);
+
+afterAll(async () => {
+  await reset();
+  await seed(prisma);
+  await prisma.$disconnect();
+});
 
 describe('Phase 2 inventory services', () => {
   it('receives a purchase atomically with inventory, movement, and audit records', async () => {
