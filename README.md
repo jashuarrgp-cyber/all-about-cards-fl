@@ -92,3 +92,13 @@ Phase 1 does not implement inventory, purchases, sales, orders, customers, consi
 ## Phase 2 local PostgreSQL workflow
 
 Start a nonproduction local database with `docker compose up -d postgres`, then set `DATABASE_URL=postgresql://aacfl:aacfl_local_only@localhost:5432/aacfl_dev?schema=public`. Apply migrations with `npm run prisma:migrate:deploy`, generate Prisma Client with `npm run prisma:generate`, and load synthetic idempotent seed data with `npm run db:seed`. Run database-backed integration tests against an isolated test database using `npm run test:integration`. Stop local PostgreSQL with `docker compose down`; add `-v` only when you intentionally want to delete local development data.
+
+## Phase 3A: read-only internal catalog and inventory visibility
+
+Phase 3A introduces an authenticated internal workspace at `/app` with read-only operational routes for `/app/catalog`, `/app/catalog/[productId]`, `/app/inventory`, `/app/inventory/lots/[lotId]`, and `/app/inventory/items/[itemId]`. The workspace provides mobile-friendly catalog search, inventory filters, bounded server-side pagination, dashboard counts, and stable UUID-based detail pages.
+
+Cost protection is enforced in server-only Prisma query modules: users without `cost:read` do not select or receive acquisition cost, purchase cost, internal margin, or profit data. This phase remains read-only and does not add scanner, buying-lot, market pricing, Confirm Lot, labels, QR code, sales, ecommerce, payment, or POS features.
+
+### Phase 3A automated test authentication
+
+Automated component, route, and Playwright tests may use the fixed `aacfl_test_identity` cookie values `owner`, `employee`, or `vendor`. This test authentication path is guarded by `TEST_ENV=true`, refuses to activate when `NODE_ENV=production`, and does not accept arbitrary roles or user JSON from requests. Normal application pages still call the same server-side `requirePermission` checks before rendering protected catalog and inventory data.

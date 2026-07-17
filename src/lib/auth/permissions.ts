@@ -13,21 +13,19 @@ export const permissions = [
   'admin:access',
   'users:manage',
   'system:settings',
+  'catalog:read',
+  'inventory:read',
+  'cost:read',
 ] as const;
 export type Permission = (typeof permissions)[number];
 export const rolePermissions: Record<Role, readonly Permission[]> = {
   OWNER: permissions,
-  ADMINISTRATOR: [
-    'dashboard:access',
-    'admin:access',
-    'users:manage',
-    'system:settings',
-  ],
-  MANAGER: ['dashboard:access'],
-  EMPLOYEE: ['dashboard:access'],
-  CARD_SHOW_VENDOR: ['dashboard:access'],
-  CONSIGNOR: ['dashboard:access'],
-  CUSTOMER: ['dashboard:access'],
+  ADMINISTRATOR: permissions,
+  MANAGER: ['dashboard:access', 'catalog:read', 'inventory:read', 'cost:read'],
+  EMPLOYEE: ['dashboard:access', 'catalog:read', 'inventory:read'],
+  CARD_SHOW_VENDOR: ['dashboard:access', 'catalog:read', 'inventory:read'],
+  CONSIGNOR: [],
+  CUSTOMER: [],
 };
 export function hasPermission(
   userRoles: readonly Role[],

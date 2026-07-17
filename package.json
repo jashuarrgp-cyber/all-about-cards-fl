@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
+    "test": "vitest run tests/unit tests/integration tests/component",
     "test:integration": "vitest run tests/integration",
     "test:e2e": "playwright test",
     "prisma:format": "prisma format",
@@ -24,7 +24,9 @@
     "security:audit": "npm audit --audit-level=moderate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
-    "db:reset:test": "tsx scripts/reset-test-db.ts"
+    "db:reset:test": "tsx scripts/reset-test-db.ts",
+    "test:unit": "vitest run tests/unit",
+    "test:component": "vitest run tests/component"
   },
   "dependencies": {
     "@auth/prisma-adapter": "2.10.0",

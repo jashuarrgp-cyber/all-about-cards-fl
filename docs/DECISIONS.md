@@ -41,3 +41,13 @@ Rationale: This avoids brittle or non-compliant integrations and allows implemen
 - Keep movement history append-only and use restrictive foreign keys for inventory, purchase, and ledger records.
 - Use `Decimal(18,4)` for acquisition unit costs and `Decimal(18,2)` for purchase totals.
 - Defer sales orders, POS, ecommerce, settlements, scraping, pricing APIs, and marketplace integrations to later phases.
+
+## Phase 3A read-only internal workspace
+
+Phase 3A adds authenticated, server-permissioned, read-only routes under `/app` for dashboard, catalog, and inventory visibility. The scope intentionally excludes scanner, buying-lot, pricing, Confirm Lot, labels, QR, sales, POS, ecommerce, and payment behavior.
+
+Server permissions now distinguish `catalog:read`, `inventory:read`, and `cost:read`. Owners, administrators, and managers can read costs; employees and card-show vendors can view catalog and inventory without cost fields; consignors and customers do not receive internal workspace access.
+
+Catalog and inventory data access is centralized in server-only query modules. Query parameters are validated before use, page sizes are bounded, UUID primary keys are used for detail routes, and pagination links preserve filters. Cost-aware inventory selectors omit acquisition cost, purchase references, and currency fields unless the caller has `cost:read`, preventing cost data from being sent to the browser for restricted users.
+
+The mobile design uses compact filters, card-based inventory and catalog records, large touch targets, and bottom navigation at small viewport widths. Later Phase 3B vendor workflow features remain deferred.

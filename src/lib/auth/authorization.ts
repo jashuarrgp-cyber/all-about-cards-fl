@@ -1,9 +1,12 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
+import { getTestAuthenticatedUser } from '@/lib/auth/test-auth';
 import { hasPermission, type Permission } from './permissions';
 
 export async function getCurrentUser() {
+  const testUser = await getTestAuthenticatedUser();
+  if (testUser) return testUser;
   const session = await auth();
   return session?.user ?? null;
 }

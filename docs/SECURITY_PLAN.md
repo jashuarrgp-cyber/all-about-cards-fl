@@ -37,3 +37,7 @@ Phase 1 uses NextAuth.js/Auth.js `next-auth@5.0.0-beta.31` with the Prisma adapt
 ## Phase 2 data security notes
 
 Internal cost basis, ownership type, consignor references, purchases, and movement history are treated as server-side business data. Phase 2 does not add public APIs or customer-facing inventory workflows. Seed data is synthetic only and local PostgreSQL credentials in Docker Compose are nonproduction examples.
+
+## Phase 3A test authentication guardrails
+
+Phase 3A test automation uses a fixed test-identity cookie only when `TEST_ENV=true` and `NODE_ENV` is not `production`. The allowed identities are hard-coded test owner, employee, vendor, and customer records; request-provided roles or arbitrary user payloads are ignored. This keeps automated route and Playwright tests independent from live GitHub OAuth while preserving the normal server-side permission checks used by `/app`, catalog, and inventory routes.

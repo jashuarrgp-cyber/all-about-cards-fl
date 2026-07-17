@@ -215,3 +215,78 @@ describe('Phase 2 inventory services', () => {
     await releaseReservedQuantity(prisma, { lotId: lot.id, quantity: 1 });
   });
 });
+
+describe('Phase 3A read-only catalog and inventory queries', () => {
+  it('searches, filters, paginates catalog, and loads stable id detail', async () => {
+    await seed(prisma);
+    const { listCatalogProducts, getCatalogProductDetail } = await import(
+      '@/lib/catalog/queries'
+    );
+    expect(
+      (await listCatalogProducts({ q: 'Electric' })).items[0].name,
+    ).toContain('Electric');
+    expect(
+      (await listCatalogProducts({ game: 'ONE_PIECE' })).items.every(
+        (p) => p.game === 'ONE_PIECE',
+      ),
+    ).toBe(true);
+    const page = await listCatalogProducts({ page: '1', pageSize: '10' });
+    expect(page.items.length).toBeLessThanOrEqual(10);
+    expect(
+      await getCatalogProductDetail('00000000-0000-4000-8000-000000000101'),
+    ).toMatchObject({ id: '00000000-0000-4000-8000-000000000101' });
+  });
+  it('filters inventory and protects cost fields by permission-aware selection', async () => {
+    await seed(prisma);
+    const { listInventory, getIndividualItemDetail, getQuantityLotDetail } =
+      await import('@/lib/inventory/queries');
+    const all = await listInventory({}, false);
+    expect(all.lotTotal).toBeGreaterThan(0);
+    expect(all.itemTotal).toBeGreaterThan(0);
+    expect(all.lots[0]).not.toHaveProperty('acquisitionUnitCost');
+    expect(all.items[0]).not.toHaveProperty('acquisitionCost');
+    expect(
+      (await listInventory({ type: 'quantity' }, true)).items,
+    ).toHaveLength(0);
+    expect(
+      (await listInventory({ type: 'individual' }, true)).lots,
+    ).toHaveLength(0);
+    expect(
+      (await listInventory({ ownershipType: 'CONSIGNMENT' }, true)).items[0]
+        .consignor?.displayName,
+    ).toBe('Synthetic Demo Consignor');
+    const byLocation = await listInventory(
+      { locationId: all.locations[0].id },
+      true,
+    );
+    expect(byLocation.total).toBeGreaterThanOrEqual(0);
+    expect(
+      await getQuantityLotDetail('00000000-0000-4000-8000-000000000301', true),
+    ).toHaveProperty('acquisitionUnitCost');
+    expect(
+      await getIndividualItemDetail(
+        all.items[0]?.id ??
+          (await listInventory({ type: 'individual' }, true)).items[0].id,
+        true,
+      ),
+    ).toHaveProperty('acquisitionCost');
+  });
+  it('preserves exact BAM consignor display when present', async () => {
+    const { loc, product } = await base();
+    const bam = await prisma.consignor.create({ data: { displayName: 'BAM' } });
+    await prisma.individualInventoryItem.create({
+      data: {
+        productId: product.id,
+        ownershipType: 'CONSIGNMENT',
+        consignorId: bam.id,
+        locationId: loc.id,
+        acquisitionCost: '1.0000',
+        internalInventoryId: 'BAM-1',
+      },
+    });
+    const { listInventory } = await import('@/lib/inventory/queries');
+    expect(
+      (await listInventory({ q: 'BAM' }, true)).items[0].consignor?.displayName,
+    ).toBe('BAM');
+  });
+});
