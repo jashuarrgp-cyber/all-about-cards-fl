@@ -205,18 +205,52 @@ function CardDetailView({
             .join(' · ')}
         </p>
 
-        <div className="mt-4 rounded-2xl border border-white/5 bg-white/[0.03] px-6 py-4 text-center">
-          {card.marketPrice !== null ? (
-            <>
-              <div className="text-2xl font-bold tabular-nums text-white">
-                {formatUsd2(card.marketPrice)}
+        <div className="mt-4 w-full overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03]">
+          <div className="px-6 py-4 text-center">
+            {card.marketPrice !== null ? (
+              <>
+                <div className="text-3xl font-bold tabular-nums text-white">
+                  {formatUsd2(card.marketPrice)}
+                </div>
+                <div className="mt-1 text-[11px] text-slate-500">
+                  Live market price · TCGplayer
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-slate-500">Price unavailable</div>
+            )}
+          </div>
+
+          {(card.priceLow !== null || card.priceHigh !== null) && (
+            <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
+              <div className="px-3 py-2.5 text-center">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Low
+                </div>
+                <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                  {card.priceLow !== null ? formatUsd2(card.priceLow) : '—'}
+                </div>
               </div>
-              <div className="mt-1 text-[11px] text-slate-500">
-                Live market price
+              <div className="px-3 py-2.5 text-center">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  High
+                </div>
+                <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                  {card.priceHigh !== null ? formatUsd2(card.priceHigh) : '—'}
+                </div>
               </div>
-            </>
-          ) : (
-            <div className="text-sm text-slate-500">Price unavailable</div>
+            </div>
+          )}
+
+          {card.tcgplayerUrl && (
+            <a
+              href={card.tcgplayerUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-teal"
+            >
+              Full price history &amp; recent sales on TCGplayer ↗
+            </a>
           )}
         </div>
       </div>

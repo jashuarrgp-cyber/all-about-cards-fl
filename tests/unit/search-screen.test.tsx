@@ -43,7 +43,11 @@ const SUCCESS_BODY = {
       setSeries: 'Sword & Shield',
       rarity: 'Common',
       imageSmall: 'https://images.pokemontcg.io/swsh7/8.png',
+      imageLarge: 'https://images.pokemontcg.io/swsh7/8_hires.png',
       marketPrice: 2.1,
+      priceLow: 1.2,
+      priceHigh: 8,
+      tcgplayerUrl: 'https://prices.pokemontcg.io/tcgplayer/swsh7-8',
     },
     {
       id: 'base1-58',
@@ -53,7 +57,11 @@ const SUCCESS_BODY = {
       setSeries: 'Base',
       rarity: 'Common',
       imageSmall: null,
+      imageLarge: null,
       marketPrice: null,
+      priceLow: null,
+      priceHigh: null,
+      tcgplayerUrl: null,
     },
   ],
 };
@@ -185,7 +193,15 @@ describe('SearchScreen', () => {
     fireEvent.click(screen.getAllByText('Pikachu')[0]);
 
     expect(screen.getByRole('heading', { name: 'Pikachu' })).toBeTruthy();
-    expect(screen.getByText('Live market price')).toBeTruthy();
+    expect(screen.getByText(/Live market price/)).toBeTruthy();
+    expect(screen.getByText('$1.20')).toBeTruthy();
+    expect(screen.getByText('$8.00')).toBeTruthy();
+    const tcgplayerLink = screen.getByRole('link', {
+      name: /TCGplayer/,
+    }) as HTMLAnchorElement;
+    expect(tcgplayerLink.href).toBe(
+      'https://prices.pokemontcg.io/tcgplayer/swsh7-8',
+    );
     expect(screen.queryByText('Add to your collection')).toBeNull();
 
     fireEvent.click(screen.getByText('‹ Back'));

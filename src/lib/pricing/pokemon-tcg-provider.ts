@@ -227,6 +227,8 @@ function mapCard(raw: unknown): PriceableCard | null {
 
   const set = isRecord(r.set) ? r.set : {};
   const images = isRecord(r.images) ? r.images : {};
+  const tcgplayer = isRecord(r.tcgplayer) ? r.tcgplayer : {};
+  const priceDetail = pickPriceDetail(tcgplayer);
 
   return {
     id,
@@ -237,25 +239,42 @@ function mapCard(raw: unknown): PriceableCard | null {
     rarity: typeof r.rarity === 'string' ? r.rarity : null,
     imageSmall: typeof images.small === 'string' ? images.small : null,
     imageLarge: typeof images.large === 'string' ? images.large : null,
-    marketPrice: pickMarketPrice(r.tcgplayer),
+    marketPrice: priceDetail.market,
+    priceLow: priceDetail.low,
+    priceHigh: priceDetail.high,
+    tcgplayerUrl: typeof tcgplayer.url === 'string' ? tcgplayer.url : null,
   };
 }
 
-function marketPriceOf(variant: unknown): number | null {
-  if (!isRecord(variant)) return null;
-  const market = variant.market;
-  return typeof market === 'number' && Number.isFinite(market) ? market : null;
+interface PriceDetail {
+  market: number | null;
+  low: number | null;
+  high: number | null;
 }
 
-function pickMarketPrice(tcgplayer: unknown): number | null {
-  if (!isRecord(tcgplayer)) return null;
+const NO_PRICE_DETAIL: PriceDetail = { market: null, low: null, high: null };
+
+function num(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+/** Only returns a detail when the variant has a market price — the same rule the old marketPrice-only picker used, so a "priced" card always has a headline number. */
+function priceDetailOf(variant: unknown): PriceDetail | null {
+  if (!isRecord(variant)) return null;
+  const market = num(variant.market);
+  if (market === null) return null;
+  return { market, low: num(variant.low), high: num(variant.high) };
+}
+
+function pickPriceDetail(tcgplayer: unknown): PriceDetail {
+  if (!isRecord(tcgplayer)) return NO_PRICE_DETAIL;
   const prices = tcgplayer.prices;
-  if (!isRecord(prices)) return null;
+  if (!isRecord(prices)) return NO_PRICE_DETAIL;
 
   // Prefer the common modern-era variant names in a sensible order first.
   for (const key of VARIANT_PRIORITY) {
-    const price = marketPriceOf(prices[key]);
-    if (price !== null) return price;
+    const detail = priceDetailOf(prices[key]);
+    if (detail) return detail;
   }
 
   // Pokémon has many historical print variants this list can't fully
@@ -263,11 +282,11 @@ function pickMarketPrice(tcgplayer: unknown): number | null {
   // sets). Fall back to any variant that actually has a usable price rather
   // than showing "Price unavailable" for a card that has one.
   for (const key of Object.keys(prices)) {
-    const price = marketPriceOf(prices[key]);
-    if (price !== null) return price;
+    const detail = priceDetailOf(prices[key]);
+    if (detail) return detail;
   }
 
-  return null;
+  return NO_PRICE_DETAIL;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

@@ -91,9 +91,17 @@ describe('searchPokemonCards', () => {
     expect(pikachu.imageLarge).toBe(
       'https://images.pokemontcg.io/swsh7/8_hires.png',
     );
+    expect(pikachu.priceLow).toBe(1.2);
+    expect(pikachu.priceHigh).toBe(8);
+    expect(pikachu.tcgplayerUrl).toBe(
+      'https://prices.pokemontcg.io/tcgplayer/swsh7-8',
+    );
 
     const alakazam = result.cards[1];
     expect(alakazam.marketPrice).toBeNull();
+    expect(alakazam.priceLow).toBeNull();
+    expect(alakazam.priceHigh).toBeNull();
+    expect(alakazam.tcgplayerUrl).toBeNull();
     expect(alakazam.setName).toBe('Base');
   });
 
@@ -105,6 +113,8 @@ describe('searchPokemonCards', () => {
 
     expect(result.cards).toHaveLength(1);
     expect(result.cards[0].marketPrice).toBe(375.5);
+    expect(result.cards[0].priceLow).toBe(200);
+    expect(result.cards[0].priceHigh).toBe(900);
   });
 
   it('builds the request URL with a wildcard name query and API key header', async () => {

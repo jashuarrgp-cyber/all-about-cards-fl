@@ -12,6 +12,11 @@ export interface PriceableCard {
   imageLarge: string | null;
   /** Public market price in USD, or null when the provider has none for this card. */
   marketPrice: number | null;
+  /** Low/high of the same priced variant as marketPrice — a real range, not a guess. */
+  priceLow: number | null;
+  priceHigh: number | null;
+  /** Real link to this card's TCGplayer page (full price history, recent sales, listings) — we don't host that data ourselves. */
+  tcgplayerUrl: string | null;
 }
 
 export interface CardSearchResult {
