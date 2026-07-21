@@ -13,7 +13,12 @@ import { searchPokemonCards } from '@/lib/pricing/pokemon-tcg-provider';
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q') ?? '';
+  const setId = request.nextUrl.searchParams.get('setId') ?? undefined;
   const result = await searchPokemonCards(query, {
+    setId,
+    // A whole set can have 200+ cards; a plain name search stays at the
+    // provider's small default page size.
+    pageSize: setId ? 250 : undefined,
     apiKey: process.env.POKEMON_TCG_API_KEY || undefined,
   });
   return NextResponse.json(result);

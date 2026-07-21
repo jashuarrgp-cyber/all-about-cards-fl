@@ -10,20 +10,28 @@ import { SearchScreen } from '@/components/search/search-screen';
 
 // Component-level render test with a stubbed fetch. This verifies the UI
 // itself renders correctly for a successful search (including the
-// "Price unavailable" case for a card with no market price), and for a
-// service failure — without ever pointing the real API route at a mock host
-// (which would mean adding an SSRF-prone base-URL override just for tests).
-// Provider parsing/network-degradation logic is covered separately in
-// tests/unit/pricing.test.ts against realistic API fixtures.
+// "Price unavailable" case for a card with no market price), browsing by
+// set, and a service failure — without ever pointing the real API route at
+// a mock host (which would mean adding an SSRF-prone base-URL override just
+// for tests). Provider parsing/network-degradation logic is covered
+// separately in tests/unit/pricing.test.ts against realistic API fixtures.
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
 
+const EMPTY_SETS_BODY = {
+  ok: true,
+  sets: [],
+  source: '',
+  fetchedAt: new Date().toISOString(),
+};
+
 const SUCCESS_BODY = {
   ok: true,
   query: 'pikachu',
+  setId: null,
   source: 'TCGplayer market price via the Pokémon TCG API',
   fetchedAt: new Date().toISOString(),
   cards: [
@@ -50,10 +58,35 @@ const SUCCESS_BODY = {
   ],
 };
 
+const SETS_BODY = {
+  ok: true,
+  source: 'TCGplayer market price via the Pokémon TCG API',
+  fetchedAt: new Date().toISOString(),
+  sets: [
+    {
+      id: 'swsh7',
+      name: 'Evolving Skies',
+      series: 'Sword & Shield',
+      releaseDate: '2021/08/27',
+      total: 237,
+      logo: 'https://images.pokemontcg.io/swsh7/logo.png',
+      symbol: 'https://images.pokemontcg.io/swsh7/symbol.png',
+    },
+  ],
+};
+
 describe('SearchScreen', () => {
-  it('shows the empty prompt before typing anything', () => {
+  it('shows the empty prompt and loads sets to browse before typing anything', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ json: async () => EMPTY_SETS_BODY }),
+    );
     render(<SearchScreen />);
     expect(screen.getByText(/Search any Pokémon card/)).toBeTruthy();
+    expect(screen.getByText('Browse by set')).toBeTruthy();
+    // Wait for the sets fetch to settle so its state update doesn't leak
+    // into the next test.
+    await waitFor(() => expect(screen.queryByText('Loading sets…')).toBeNull());
   });
 
   it('renders a live price and a price-unavailable card after a successful search', async () => {
@@ -81,6 +114,7 @@ describe('SearchScreen', () => {
         json: async () => ({
           ok: false,
           query: 'zzz',
+          setId: null,
           cards: [],
           source: '',
           fetchedAt: new Date().toISOString(),
@@ -98,5 +132,41 @@ describe('SearchScreen', () => {
       () => expect(screen.getByText(/returned an error/)).toBeTruthy(),
       { timeout: 2000 },
     );
+  });
+
+  it('lets you browse a set and see its cards', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes('/sets')) {
+          return Promise.resolve({ json: async () => SETS_BODY });
+        }
+        return Promise.resolve({ json: async () => SUCCESS_BODY });
+      }),
+    );
+
+    render(<SearchScreen />);
+
+    await waitFor(() =>
+      expect(screen.getByText('Evolving Skies')).toBeTruthy(),
+    );
+    fireEvent.click(screen.getByText('Evolving Skies'));
+
+    // Back button + set name header appear once a set is active.
+    expect(screen.getByText('‹ Sets')).toBeTruthy();
+
+    await waitFor(() => expect(screen.getByText('$2.10')).toBeTruthy(), {
+      timeout: 2000,
+    });
+
+    // The request for cards was scoped to the selected set.
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    const setCardCall = fetchMock.mock.calls.find((call) =>
+      String(call[0]).includes('setId=swsh7'),
+    );
+    expect(setCardCall).toBeTruthy();
+
+    fireEvent.click(screen.getByText('‹ Sets'));
+    expect(screen.getByText('Browse by set')).toBeTruthy();
   });
 });

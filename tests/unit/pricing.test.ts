@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { searchPokemonCards } from '@/lib/pricing/pokemon-tcg-provider';
+import {
+  listPokemonSets,
+  searchPokemonCards,
+} from '@/lib/pricing/pokemon-tcg-provider';
 
 // Fixtures shaped like real Pokémon TCG API v2 responses
 // (https://docs.pokemontcg.io/api-reference/cards/search-cards), so the
@@ -127,5 +130,100 @@ describe('searchPokemonCards', () => {
     // card with both id and name survives.
     expect(result.cards).toHaveLength(1);
     expect(result.cards[0].id).toBe('swsh7-8');
+  });
+
+  it('combines a name query with a setId into one query string', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ data: [] }));
+    await searchPokemonCards('pikachu', {
+      fetchImpl,
+      setId: 'swsh7',
+      baseUrl: 'https://example.test/v2',
+    });
+
+    const [url] = fetchImpl.mock.calls[0];
+    const decoded = decodeURIComponent(url);
+    expect(decoded).toContain('name:"pikachu*"');
+    expect(decoded).toContain('set.id:swsh7');
+  });
+
+  it('searches by setId alone when no name is given', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ data: [] }));
+    const result = await searchPokemonCards('', {
+      fetchImpl,
+      setId: 'swsh7',
+    });
+
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(decodeURIComponent(fetchImpl.mock.calls[0][0])).toContain(
+      'set.id:swsh7',
+    );
+    expect(result.setId).toBe('swsh7');
+  });
+
+  it('returns an empty ok result without fetching when neither name nor setId is given', async () => {
+    const fetchImpl = vi.fn();
+    const result = await searchPokemonCards('  ', { fetchImpl });
+    expect(result.ok).toBe(true);
+    expect(result.setId).toBeNull();
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+const SET_FIXTURE = {
+  id: 'swsh7',
+  name: 'Evolving Skies',
+  series: 'Sword & Shield',
+  printedTotal: 203,
+  total: 237,
+  releaseDate: '2021/08/27',
+  images: {
+    symbol: 'https://images.pokemontcg.io/swsh7/symbol.png',
+    logo: 'https://images.pokemontcg.io/swsh7/logo.png',
+  },
+};
+
+describe('listPokemonSets', () => {
+  it('maps a successful response to set summaries', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ data: [SET_FIXTURE] }));
+    const result = await listPokemonSets({ fetchImpl });
+
+    expect(result.ok).toBe(true);
+    expect(result.sets).toHaveLength(1);
+    expect(result.sets[0]).toMatchObject({
+      id: 'swsh7',
+      name: 'Evolving Skies',
+      series: 'Sword & Shield',
+      releaseDate: '2021/08/27',
+      total: 237,
+      logo: 'https://images.pokemontcg.io/swsh7/logo.png',
+    });
+  });
+
+  it('degrades gracefully on a non-OK status', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({}, 500));
+    const result = await listPokemonSets({ fetchImpl });
+    expect(result.ok).toBe(false);
+    expect(result.sets).toEqual([]);
+    expect(result.error).toContain('500');
+  });
+
+  it('degrades gracefully on a network failure', async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new Error('offline'));
+    const result = await listPokemonSets({ fetchImpl });
+    expect(result.ok).toBe(false);
+    expect(result.error).toContain('Could not reach');
+  });
+
+  it('drops malformed set entries', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        jsonResponse({ data: [null, { id: 'x' }, SET_FIXTURE] }),
+      );
+    const result = await listPokemonSets({ fetchImpl });
+    expect(result.sets).toHaveLength(1);
+    expect(result.sets[0].id).toBe('swsh7');
   });
 });

@@ -3,6 +3,22 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (later still) — Browse by Set added to live Search
+
+- Extended the live pricing engine from last round: the Search tab now also
+  lets you browse real Pokémon sets (official logo, series, release year,
+  card count) and tap into one to see every card in that set with live
+  prices — reuses the same search infrastructure, just filtered by set.
+- Added `listPokemonSets()` to the pricing provider and a new public
+  `/api/pricing/sets` route, mirroring the existing search route.
+- Same honesty rules as before: real data only, graceful "couldn't load"
+  messages on failure, no fake numbers.
+- Verified: typecheck, lint, all 32 unit/integration tests (18 new: 8
+  provider tests for sets + combined name/set queries, 1 new component
+  test for the browse-and-select flow), production build, and a live
+  browser check confirming the degrade path (this sandbox still can't
+  reach the real internet) renders cleanly with no crash.
+
 ## 2026-07-21 (end of session) — Status wrap-up
 
 **Finished today (all merged to `main` with Josh's approval):**
