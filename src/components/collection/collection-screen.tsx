@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type {
   CollectionItem,
@@ -68,7 +69,13 @@ function CollectionCard({ item }: { item: CollectionItem }) {
   );
 }
 
-export function CollectionScreen({ data }: { data: CollectionSnapshot }) {
+export function CollectionScreen({
+  data,
+  scanHref = '/app/scan',
+}: {
+  data: CollectionSnapshot;
+  scanHref?: string;
+}) {
   const [filter, setFilter] = useState<Filter>('ALL');
   const [query, setQuery] = useState('');
 
@@ -89,14 +96,22 @@ export function CollectionScreen({ data }: { data: CollectionSnapshot }) {
 
   return (
     <div className="space-y-5 pb-6 pt-5">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Collection</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {formatCount(totalCopies)} items ·{' '}
-          {data.isLive
-            ? 'live from your inventory'
-            : 'sample data — connects to your live inventory automatically'}
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Collection</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {formatCount(totalCopies)} items ·{' '}
+            {data.isLive
+              ? 'live from your inventory'
+              : 'sample data — connects to your live inventory automatically'}
+          </p>
+        </div>
+        <Link
+          href={scanHref}
+          className="shrink-0 rounded-full bg-brand-teal px-4 py-2 text-sm font-bold text-base-950 no-underline"
+        >
+          Scan
+        </Link>
       </div>
 
       <label className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.04] px-4 py-3">

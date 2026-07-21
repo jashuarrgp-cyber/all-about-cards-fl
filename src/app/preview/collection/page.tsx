@@ -18,7 +18,7 @@ export default function CollectionPreviewPage() {
       <div className="rounded-b-2xl bg-brand-teal/10 px-4 py-1.5 text-center text-[11px] font-medium text-brand-teal">
         Design preview · sample data
       </div>
-      <CollectionScreen data={sampleCollection} />
+      <CollectionScreen data={sampleCollection} scanHref="/preview/scan" />
     </MobileFrame>
   );
 }

@@ -3,6 +3,25 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (later) — Card scanner + AI Centering
+
+- Merged PR #7 with Josh's approval (mobile shell, Portfolio, Collection).
+- Built **AI Centering**: camera capture or photo upload, on-device border
+  detection (outer card edge + inner printed frame), grader-style L/R and
+  T/B splits, manual fine-tuning of all 8 lines (drag or arrows), and an
+  approximate grade readout (labeled approximate). Photos never leave the
+  device. Detection math is unit-tested against synthetic card images.
+- Built the **card scan flow**: camera view with capture frame, tap-to-match
+  card identification against a sample catalog with sample prices (labeled),
+  quantity steppers, running market total, and a Review Scans screen.
+  Automatic recognition needs a licensed recognition/pricing service — it
+  plugs into this same flow in a later phase. Scan sessions are not yet
+  written to inventory (that lands with the receiving phase).
+- Security: Permissions-Policy now allows the camera for this origin only
+  (mic and location remain blocked); strict image CSP kept intact.
+- Collection screen gained a Scan button; scan lives under the Collection
+  tab. New previews: `/preview/ai-centering`, `/preview/scan`.
+
 ## 2026-07-21 — Collection tab + project memory files
 
 - Added `CLAUDE.md`, `PROJECT_VISION.md`, `PROGRESS.md` (this file) so new
