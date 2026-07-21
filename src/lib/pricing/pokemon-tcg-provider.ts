@@ -240,18 +240,32 @@ function mapCard(raw: unknown): PriceableCard | null {
   };
 }
 
+function marketPriceOf(variant: unknown): number | null {
+  if (!isRecord(variant)) return null;
+  const market = variant.market;
+  return typeof market === 'number' && Number.isFinite(market) ? market : null;
+}
+
 function pickMarketPrice(tcgplayer: unknown): number | null {
   if (!isRecord(tcgplayer)) return null;
   const prices = tcgplayer.prices;
   if (!isRecord(prices)) return null;
 
+  // Prefer the common modern-era variant names in a sensible order first.
   for (const key of VARIANT_PRIORITY) {
-    const variant = prices[key];
-    if (isRecord(variant)) {
-      const market = variant.market;
-      if (typeof market === 'number' && Number.isFinite(market)) return market;
-    }
+    const price = marketPriceOf(prices[key]);
+    if (price !== null) return price;
   }
+
+  // Pokémon has many historical print variants this list can't fully
+  // enumerate (e.g. "unlimited", "1stEdition", "unlimitedHolofoil" on older
+  // sets). Fall back to any variant that actually has a usable price rather
+  // than showing "Price unavailable" for a card that has one.
+  for (const key of Object.keys(prices)) {
+    const price = marketPriceOf(prices[key]);
+    if (price !== null) return price;
+  }
+
   return null;
 }
 
