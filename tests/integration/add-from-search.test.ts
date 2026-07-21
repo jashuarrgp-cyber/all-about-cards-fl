@@ -53,7 +53,10 @@ describe('addCardFromSearch', () => {
       where: { id: result.lotId },
     });
     expect(lot.quantityOnHand).toBe(3);
-    expect(lot.acquisitionUnitCost.toString()).toBe('2.5000');
+    // Compare numerically rather than against an exact string — Prisma's
+    // Decimal.toString() returns the minimal representation ("2.5"), not
+    // one padded to the column's Decimal(18,4) scale ("2.5000").
+    expect(lot.acquisitionUnitCost.toNumber()).toBe(2.5);
     expect(lot.ownershipType).toBe('COMPANY');
 
     const movement = await prisma.inventoryMovement.findFirstOrThrow({
@@ -126,6 +129,6 @@ describe('addCardFromSearch', () => {
     const lot = await prisma.quantityInventoryLot.findUniqueOrThrow({
       where: { id: result.lotId },
     });
-    expect(lot.acquisitionUnitCost.toString()).toBe('0.0000');
+    expect(lot.acquisitionUnitCost.toNumber()).toBe(0);
   });
 });
