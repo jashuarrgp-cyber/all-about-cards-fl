@@ -34,6 +34,23 @@ Rationale: This avoids brittle or non-compliant integrations and allows implemen
 - Use structured logging with sensitive-field redaction.
 - Keep Phase 2 business workflows out of Phase 1.
 
+## 2026-07-21: Live pricing uses the Pokémon TCG API
+
+Decision: The Search tab's live pricing uses the free, public, official
+Pokémon TCG API (pokemontcg.io), which republishes TCGplayer market prices.
+No API key is required for normal use; an optional key raises the rate
+limit. The provider call happens server-side (`src/lib/pricing/`) behind a
+public read-only route (`/api/pricing/search`) that returns only public card
+names and public market prices — never cost or profit. Pokémon is the only
+game covered for now; no equivalent free/official source was identified for
+the other games in the catalog.
+
+Rationale: Matches `docs/INTEGRATIONS.md` — official access, no scraping, no
+invented TCGplayer/eBay/PSA credentials. The provider degrades gracefully
+(returns `ok: false` with a short user-safe reason) on timeout, HTTP error,
+or network failure, the same defensive pattern already used for database
+queries, so the UI never fakes a price.
+
 ## Phase 2 decisions
 
 - Use PostgreSQL as the only supported database for development, CI, and tests; SQLite is not used as a fallback.
