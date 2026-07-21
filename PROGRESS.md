@@ -3,9 +3,53 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (end of session) — Status wrap-up
+
+**Finished today (all merged to `main` with Josh's approval):**
+
+- PR #7 merged: mobile app shell, Portfolio dashboard, Collection tab,
+  project memory files.
+- PR #8 merged: card scan flow + AI Centering (details in the entry below).
+  CI was green (full suite including database integration tests) before
+  merging.
+
+**Unfinished / not started:**
+
+- Live market pricing — every dollar figure in the app is still a labeled
+  sample. Needs a licensed pricing source (no scraping).
+- Automatic card recognition — the scan flow works but identification is
+  tap-to-match; a licensed recognition service plugs into the same flow.
+- Scan → inventory saving — scan sessions are session-only; writing them
+  into real inventory (with cost basis and locations) is the receiving
+  phase.
+- Market tab, Search tab, Social tab, Profile tab — polished "coming soon"
+  placeholders only.
+- Sales / card-show POS, consignment payouts, storefront/Stripe, PWA.
+
+**Known problems / gotchas for the next session:**
+
+- Mid-session, this environment's GitHub _write_ access went stale (reads
+  worked, pushes/API writes returned 403). It recovered on its own after
+  ~30 minutes. If it happens again: keep the work committed locally, retry
+  periodically, and export a `git format-patch` backup for Josh.
+- After a squash-merge, the working branch MUST be restarted from
+  `origin/main` (`git checkout -B claude/all-about-cards-sync-yhsp8x
+origin/main`). Reusing the old branch history makes GitHub report merge
+  conflicts and silently blocks CI from starting on the PR.
+- Commits must be signed (repo config is already set up: SSH signing key +
+  `commit.gpgsign=true`) and authored as Claude <noreply@anthropic.com>,
+  or a stop-hook flags them and GitHub shows them Unverified.
+- The database is not reachable in these sandboxes and the network policy
+  blocks pulling the postgres Docker image — DB tests only run in CI.
+
+**Suggested next session:** ask Josh to pick between (1) live market
+pricing, (2) scan → inventory saving, or (3) the Market tab. Read
+CLAUDE.md first; verify visually; never merge without Josh's approval.
+
 ## 2026-07-21 (later) — Card scanner + AI Centering
 
 - Merged PR #7 with Josh's approval (mobile shell, Portfolio, Collection).
+- Later merged as PR #8 after CI went green.
 - Built **AI Centering**: camera capture or photo upload, on-device border
   detection (outer card edge + inner printed frame), grader-style L/R and
   T/B splits, manual fine-tuning of all 8 lines (drag or arrows), and an
