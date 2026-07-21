@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma generate",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
