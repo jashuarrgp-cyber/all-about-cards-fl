@@ -26,7 +26,7 @@ export function BottomNav() {
                 aria-current={active ? 'page' : undefined}
                 className={`flex h-11 w-11 items-center justify-center rounded-full transition ${
                   active
-                    ? 'text-brand-teal'
+                    ? 'text-brand-pink'
                     : 'text-slate-500 hover:text-slate-300'
                 }`}
               >

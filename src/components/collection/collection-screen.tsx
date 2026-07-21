@@ -38,7 +38,7 @@ function CollectionCard({ item }: { item: CollectionItem }) {
           {item.game}
         </span>
         {item.gradeLabel ? (
-          <span className="absolute right-2 top-2 rounded-full bg-brand-teal/90 px-2 py-0.5 text-[10px] font-bold text-base-950">
+          <span className="absolute right-2 top-2 rounded-full bg-brand-pink/90 px-2 py-0.5 text-[10px] font-bold text-base-950">
             {item.gradeLabel}
           </span>
         ) : (
@@ -108,7 +108,7 @@ export function CollectionScreen({
         </div>
         <Link
           href={scanHref}
-          className="shrink-0 rounded-full bg-brand-teal px-4 py-2 text-sm font-bold text-base-950 no-underline"
+          className="shrink-0 rounded-full bg-brand-pink px-4 py-2 text-sm font-bold text-base-950 no-underline"
         >
           Scan
         </Link>

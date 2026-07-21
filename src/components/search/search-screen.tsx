@@ -249,7 +249,7 @@ function CardDetailView({
                 href={card.tcgplayerUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-teal"
+                className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-pink"
               >
                 Full price history &amp; recent sales on TCGplayer ↗
               </a>
@@ -266,7 +266,7 @@ function CardDetailView({
                   <button
                     type="button"
                     onClick={onBack}
-                    className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950"
+                    className="mt-4 w-full rounded-2xl bg-brand-pink py-3 text-sm font-bold text-base-950"
                   >
                     Back to search
                   </button>
@@ -323,7 +323,7 @@ function CardDetailView({
                     type="button"
                     onClick={handleAdd}
                     disabled={status === 'saving'}
-                    className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950 disabled:opacity-50"
+                    className="mt-4 w-full rounded-2xl bg-brand-pink py-3 text-sm font-bold text-base-950 disabled:opacity-50"
                   >
                     {status === 'saving' ? 'Adding…' : 'Add to Collection'}
                   </button>

@@ -31,7 +31,7 @@ export function TopNav() {
                     aria-current={active ? 'page' : undefined}
                     className={`flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold transition ${
                       active
-                        ? 'bg-white/[0.06] text-brand-teal'
+                        ? 'bg-white/[0.06] text-brand-pink'
                         : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >

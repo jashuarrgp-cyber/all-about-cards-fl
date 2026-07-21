@@ -237,7 +237,7 @@ export function CenteringScreen() {
     <div className="space-y-5 pb-6 pt-5">
       {stage === 'start' && (
         <div className="flex flex-col items-center py-14 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-brand-teal">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-brand-pink">
             <ScanIcon />
           </div>
           <h1 className="mt-6 text-2xl font-bold text-white">AI Centering</h1>
@@ -255,7 +255,7 @@ export function CenteringScreen() {
             <button
               type="button"
               onClick={startCamera}
-              className="rounded-2xl bg-brand-teal py-3.5 text-[15px] font-bold text-base-950"
+              className="rounded-2xl bg-brand-pink py-3.5 text-[15px] font-bold text-base-950"
             >
               Use camera
             </button>
@@ -298,7 +298,7 @@ export function CenteringScreen() {
             <button
               type="button"
               onClick={capture}
-              className="flex-[2] rounded-2xl bg-brand-teal py-3.5 text-[15px] font-bold text-base-950"
+              className="flex-[2] rounded-2xl bg-brand-pink py-3.5 text-[15px] font-bold text-base-950"
             >
               Capture
             </button>
@@ -413,7 +413,7 @@ export function CenteringScreen() {
                   <button
                     type="button"
                     onClick={() => setStage('done')}
-                    className="flex-[2] rounded-2xl bg-brand-teal py-3.5 text-[15px] font-bold text-base-950"
+                    className="flex-[2] rounded-2xl bg-brand-pink py-3.5 text-[15px] font-bold text-base-950"
                   >
                     Confirm centering
                   </button>
@@ -442,7 +442,7 @@ export function CenteringScreen() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-4 inline-block rounded-full bg-brand-teal/15 px-4 py-1.5 text-sm font-semibold text-brand-teal">
+                <div className="mt-4 inline-block rounded-full bg-brand-pink/15 px-4 py-1.5 text-sm font-semibold text-brand-pink">
                   {guidance.label}
                 </div>
                 <p className="mt-3 text-[11px] text-slate-500">
@@ -460,7 +460,7 @@ export function CenteringScreen() {
                   <button
                     type="button"
                     onClick={reset}
-                    className="flex-1 rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950"
+                    className="flex-1 rounded-2xl bg-brand-pink py-3 text-sm font-bold text-base-950"
                   >
                     Analyze another
                   </button>

@@ -86,7 +86,7 @@ export const sampleSnapshot: PortfolioSnapshot = {
   ],
   breakdown: [
     { label: 'Sealed Products', value: 4992, color: '#8b7bf0' },
-    { label: 'Raw Cards', value: 4947, color: '#22d3b7' },
+    { label: 'Raw Cards', value: 4947, color: '#ff2e9f' },
     { label: 'Graded Cards', value: 213.84, color: '#f0a03c' },
   ],
   countsAreLive: false,
