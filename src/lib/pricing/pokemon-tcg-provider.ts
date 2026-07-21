@@ -1,5 +1,10 @@
 import 'server-only';
-import type { CardSearchResult, PriceableCard } from './types';
+import type {
+  CardSearchResult,
+  PriceableCard,
+  SetListResult,
+  SetSummary,
+} from './types';
 
 // Live pricing provider backed by the Pokémon TCG API (https://pokemontcg.io),
 // a free, public, official third-party catalog that republishes TCGplayer
@@ -28,6 +33,8 @@ const VARIANT_PRIORITY = [
 ] as const;
 
 export interface SearchOptions {
+  /** Narrows results to one set, e.g. "swsh7". Combines with a name query. */
+  setId?: string;
   apiKey?: string;
   baseUrl?: string;
   timeoutMs?: number;
@@ -40,12 +47,14 @@ export async function searchPokemonCards(
   options: SearchOptions = {},
 ): Promise<CardSearchResult> {
   const trimmed = query.trim();
+  const setId = options.setId?.trim() || null;
   const fetchedAt = new Date().toISOString();
 
-  if (!trimmed) {
+  if (!trimmed && !setId) {
     return {
       ok: true,
       query: trimmed,
+      setId,
       cards: [],
       source: PRICE_SOURCE_LABEL,
       fetchedAt,
@@ -61,9 +70,16 @@ export async function searchPokemonCards(
   } = options;
 
   // Strip characters that could break the provider's query syntax.
-  const safeName = trimmed.replace(/["\\]/g, '');
-  const q = `name:"${safeName}*"`;
-  const url = `${baseUrl}/cards?q=${encodeURIComponent(q)}&pageSize=${pageSize}&orderBy=-set.releaseDate`;
+  const clauses: string[] = [];
+  if (trimmed) {
+    const safeName = trimmed.replace(/["\\]/g, '');
+    clauses.push(`name:"${safeName}*"`);
+  }
+  if (setId) {
+    clauses.push(`set.id:${setId.replace(/["\\\s]/g, '')}`);
+  }
+  const q = clauses.join(' ');
+  const url = `${baseUrl}/cards?q=${encodeURIComponent(q)}&pageSize=${pageSize}&orderBy=number`;
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -72,12 +88,16 @@ export async function searchPokemonCards(
     const res = await fetchImpl(url, {
       signal: controller.signal,
       headers: apiKey ? { 'X-Api-Key': apiKey } : undefined,
+      // Prices change; never let Next's server-side fetch cache serve a
+      // stale response for this call.
+      cache: 'no-store',
     });
 
     if (!res.ok) {
       return {
         ok: false,
         query: trimmed,
+        setId,
         cards: [],
         source: PRICE_SOURCE_LABEL,
         fetchedAt,
@@ -93,6 +113,7 @@ export async function searchPokemonCards(
     return {
       ok: true,
       query: trimmed,
+      setId,
       cards,
       source: PRICE_SOURCE_LABEL,
       fetchedAt,
@@ -102,6 +123,7 @@ export async function searchPokemonCards(
     return {
       ok: false,
       query: trimmed,
+      setId,
       cards: [],
       source: PRICE_SOURCE_LABEL,
       fetchedAt,
@@ -112,6 +134,88 @@ export async function searchPokemonCards(
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export interface ListSetsOptions {
+  apiKey?: string;
+  baseUrl?: string;
+  timeoutMs?: number;
+  fetchImpl?: typeof fetch;
+  pageSize?: number;
+}
+
+export async function listPokemonSets(
+  options: ListSetsOptions = {},
+): Promise<SetListResult> {
+  const {
+    apiKey = '',
+    baseUrl = DEFAULT_BASE_URL,
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    fetchImpl = fetch,
+    pageSize = 60,
+  } = options;
+  const fetchedAt = new Date().toISOString();
+
+  const url = `${baseUrl}/sets?pageSize=${pageSize}&orderBy=-releaseDate`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetchImpl(url, {
+      signal: controller.signal,
+      headers: apiKey ? { 'X-Api-Key': apiKey } : undefined,
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        sets: [],
+        source: PRICE_SOURCE_LABEL,
+        fetchedAt,
+        error: `Pricing service returned an error (${res.status}).`,
+      };
+    }
+
+    const body = (await res.json()) as { data?: unknown[] };
+    const sets = Array.isArray(body.data)
+      ? body.data.map(mapSet).filter((s): s is SetSummary => s !== null)
+      : [];
+
+    return { ok: true, sets, source: PRICE_SOURCE_LABEL, fetchedAt };
+  } catch (err) {
+    const timedOut = err instanceof Error && err.name === 'AbortError';
+    return {
+      ok: false,
+      sets: [],
+      source: PRICE_SOURCE_LABEL,
+      fetchedAt,
+      error: timedOut
+        ? 'The pricing service took too long to respond.'
+        : 'Could not reach the pricing service.',
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function mapSet(raw: unknown): SetSummary | null {
+  if (!isRecord(raw)) return null;
+  const id = typeof raw.id === 'string' ? raw.id : null;
+  const name = typeof raw.name === 'string' ? raw.name : null;
+  if (!id || !name) return null;
+
+  const images = isRecord(raw.images) ? raw.images : {};
+
+  return {
+    id,
+    name,
+    series: typeof raw.series === 'string' ? raw.series : null,
+    releaseDate: typeof raw.releaseDate === 'string' ? raw.releaseDate : null,
+    total: typeof raw.total === 'number' ? raw.total : null,
+    logo: typeof images.logo === 'string' ? images.logo : null,
+    symbol: typeof images.symbol === 'string' ? images.symbol : null,
+  };
 }
 
 function mapCard(raw: unknown): PriceableCard | null {

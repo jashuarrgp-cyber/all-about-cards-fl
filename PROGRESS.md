@@ -3,6 +3,47 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (later still) — Made sure live prices actually stay live
+
+Josh asked "make sure the prices update." Checked for anything that could
+cause a stale/cached price to stick around instead of refreshing:
+
+- Both pricing API routes (`/api/pricing/search`, `/api/pricing/sets`) now
+  explicitly set `export const dynamic = 'force-dynamic'` and send
+  `Cache-Control: no-store`, so they can never be served from Next's route
+  cache, a browser cache, or a proxy in between.
+- The server-side call to the real Pokémon TCG API now passes
+  `cache: 'no-store'` explicitly, so Next's fetch layer never reuses an old
+  response either.
+- The browser-side fetch calls in the Search screen also pass
+  `cache: 'no-store'`, belt-and-suspenders.
+- Added tests that actually check this (not just comments claiming it):
+  route tests confirming the `force-dynamic` export and the response
+  header, provider tests confirming the outbound fetch options. Also ran
+  the real built server and read the real HTTP response headers back to
+  confirm `cache-control: no-store` is actually sent.
+- Worth knowing: this guarantees every search fetches fresh from the
+  Pokémon TCG API — but that service's own prices are a third-party
+  aggregate of TCGplayer market data, which isn't updated tick-by-tick.
+  Searching the same card twice in a row showing the same number is
+  expected, not a bug — it means nothing changed upstream yet.
+
+## 2026-07-21 (later still) — Browse by Set added to live Search
+
+- Extended the live pricing engine from last round: the Search tab now also
+  lets you browse real Pokémon sets (official logo, series, release year,
+  card count) and tap into one to see every card in that set with live
+  prices — reuses the same search infrastructure, just filtered by set.
+- Added `listPokemonSets()` to the pricing provider and a new public
+  `/api/pricing/sets` route, mirroring the existing search route.
+- Same honesty rules as before: real data only, graceful "couldn't load"
+  messages on failure, no fake numbers.
+- Verified: typecheck, lint, all 32 unit/integration tests (18 new: 8
+  provider tests for sets + combined name/set queries, 1 new component
+  test for the browse-and-select flow), production build, and a live
+  browser check confirming the degrade path (this sandbox still can't
+  reach the real internet) renders cleanly with no crash.
+
 ## 2026-07-21 (end of session) — Status wrap-up
 
 **Finished today (all merged to `main` with Josh's approval):**
