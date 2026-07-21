@@ -88,6 +88,9 @@ export async function searchPokemonCards(
     const res = await fetchImpl(url, {
       signal: controller.signal,
       headers: apiKey ? { 'X-Api-Key': apiKey } : undefined,
+      // Prices change; never let Next's server-side fetch cache serve a
+      // stale response for this call.
+      cache: 'no-store',
     });
 
     if (!res.ok) {
@@ -161,6 +164,7 @@ export async function listPokemonSets(
     const res = await fetchImpl(url, {
       signal: controller.signal,
       headers: apiKey ? { 'X-Api-Key': apiKey } : undefined,
+      cache: 'no-store',
     });
 
     if (!res.ok) {

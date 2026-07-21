@@ -11,6 +11,10 @@ import { searchPokemonCards } from '@/lib/pricing/pokemon-tcg-provider';
 // the shared strict server-env schema, which would force this route to also
 // require unrelated secrets like DATABASE_URL and AUTH_SECRET at build time.
 
+// Prices change; never let this route be served from a stale cache — not
+// Next's Route Handler cache, not a browser or intermediary cache.
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q') ?? '';
   const setId = request.nextUrl.searchParams.get('setId') ?? undefined;
@@ -21,5 +25,7 @@ export async function GET(request: NextRequest) {
     pageSize: setId ? 250 : undefined,
     apiKey: process.env.POKEMON_TCG_API_KEY || undefined,
   });
-  return NextResponse.json(result);
+  return NextResponse.json(result, {
+    headers: { 'Cache-Control': 'no-store' },
+  });
 }

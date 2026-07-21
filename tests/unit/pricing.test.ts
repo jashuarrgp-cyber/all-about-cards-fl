@@ -89,6 +89,8 @@ describe('searchPokemonCards', () => {
     // Quotes/backslashes stripped before building the query.
     expect(decodeURIComponent(url)).toContain('name:"charizard*"');
     expect(init.headers).toEqual({ 'X-Api-Key': 'test-key-123' });
+    // Prices change — never let this be served from a cache.
+    expect(init.cache).toBe('no-store');
   });
 
   it('degrades gracefully on a non-OK HTTP status', async () => {
@@ -199,6 +201,8 @@ describe('listPokemonSets', () => {
       total: 237,
       logo: 'https://images.pokemontcg.io/swsh7/logo.png',
     });
+    // Prices/set data change — never let this be served from a cache.
+    expect(fetchImpl.mock.calls[0][1].cache).toBe('no-store');
   });
 
   it('degrades gracefully on a non-OK status', async () => {

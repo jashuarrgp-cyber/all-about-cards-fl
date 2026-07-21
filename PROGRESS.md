@@ -3,6 +3,31 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (later still) — Made sure live prices actually stay live
+
+Josh asked "make sure the prices update." Checked for anything that could
+cause a stale/cached price to stick around instead of refreshing:
+
+- Both pricing API routes (`/api/pricing/search`, `/api/pricing/sets`) now
+  explicitly set `export const dynamic = 'force-dynamic'` and send
+  `Cache-Control: no-store`, so they can never be served from Next's route
+  cache, a browser cache, or a proxy in between.
+- The server-side call to the real Pokémon TCG API now passes
+  `cache: 'no-store'` explicitly, so Next's fetch layer never reuses an old
+  response either.
+- The browser-side fetch calls in the Search screen also pass
+  `cache: 'no-store'`, belt-and-suspenders.
+- Added tests that actually check this (not just comments claiming it):
+  route tests confirming the `force-dynamic` export and the response
+  header, provider tests confirming the outbound fetch options. Also ran
+  the real built server and read the real HTTP response headers back to
+  confirm `cache-control: no-store` is actually sent.
+- Worth knowing: this guarantees every search fetches fresh from the
+  Pokémon TCG API — but that service's own prices are a third-party
+  aggregate of TCGplayer market data, which isn't updated tick-by-tick.
+  Searching the same card twice in a row showing the same number is
+  expected, not a bug — it means nothing changed upstream yet.
+
 ## 2026-07-21 (later still) — Browse by Set added to live Search
 
 - Extended the live pricing engine from last round: the Search tab now also

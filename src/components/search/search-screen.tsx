@@ -121,7 +121,7 @@ export function SearchScreen({
   // Load the browse-by-set list once, up front.
   useEffect(() => {
     let cancelled = false;
-    fetch(setsEndpoint)
+    fetch(setsEndpoint, { cache: 'no-store' })
       .then((res) => res.json() as Promise<SetListResult>)
       .then((data) => {
         if (cancelled) return;
@@ -151,7 +151,7 @@ export function SearchScreen({
       if (q) params.set('q', q);
       if (activeSet) params.set('setId', activeSet.id);
 
-      fetch(`${endpoint}?${params.toString()}`)
+      fetch(`${endpoint}?${params.toString()}`, { cache: 'no-store' })
         .then((res) => res.json() as Promise<CardSearchResult>)
         .then((data) => {
           if (id === requestId.current) setResult(data);
