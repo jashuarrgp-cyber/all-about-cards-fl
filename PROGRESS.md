@@ -3,6 +3,94 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (end of session) — Card detail page, real desktop layout, new colors, and moving away from DeckTradr's look
+
+Everything below is in one open pull request, **PR #12**, not yet merged —
+still waiting on Josh to say "merge." CI (typecheck, lint, all tests,
+security audit, production build) and Vercel are both green on the latest
+commit.
+
+**Finished today:**
+
+- **Tap a card → detail page → Add to Collection.** Search results are now
+  tappable. The detail page shows the full-size image, set/number/rarity,
+  live price, and — if you're logged in — a real "Add to Collection" form
+  (quantity + optional cost) that writes a real inventory record through
+  the same audited path the rest of inventory already uses. The public,
+  no-login preview page doesn't get the Add button, on purpose.
+- **Real price range + link to full history.** Added the card's real
+  low/high price band next to the market price, plus a real link out to
+  that exact card's TCGplayer page for full price history and recent
+  sales. We don't have a licensed source for historical price charts
+  ourselves, so rather than fake one, we link to the real thing. Josh is
+  waiting to hear back from TCGplayer about API access — once that's in,
+  we can revisit building our own chart.
+- **A real desktop layout.** Until today the whole app was a phone-width
+  column even in a full browser window. Now there's a proper computer
+  layout — a left sidebar for navigation, a wider content area — while
+  the phone experience (bottom tabs) is unchanged. Same features, same
+  data, either way.
+- **New color scheme — "Miami Vice."** Josh asked for a South
+  Beach/Miami Vice feel. Swapped the app's accent color from teal to hot
+  pink and the background from plain near-black to a deep purple-black,
+  kept green/red for portfolio gains/losses (that convention is too
+  useful to break). One central place controls this (`tailwind.config.ts`),
+  so it was a low-risk change even though it touches how the whole app
+  looks.
+- **Rearranged the layout so it isn't a look-alike of DeckTradr.** Josh
+  raised a fair concern: we'd been building screens by directly copying
+  the arrangement of DeckTradr's own screenshots (image-then-price on the
+  card page, a top nav bar on desktop), and that's a real look-alike risk
+  worth avoiding, separate from just picking different colors. Kept every
+  feature and every piece of data, but changed the arrangement: the card
+  page now leads with name + price (price in its own glowing pink card
+  with pill-shaped low/high badges) with the image moved lower and to the
+  side; the desktop nav became a left sidebar instead of a top bar; the
+  Portfolio screen's stat counts became pill chips instead of a boxed
+  grid, and "Most Valuable" became a list instead of horizontal-scrolling
+  cards. I'm not a lawyer and this isn't legal advice — just a genuine
+  effort to make the design our own rather than a close copy.
+- **Fixed a flaky test in CI.** Two integration test files were both
+  wiping the same shared database tables and racing each other when
+  Vitest ran them in parallel — passed in one CI step, failed in another,
+  same run, same commit. Forced test files to run one at a time so this
+  can't happen again for any future test file either.
+- **Fixed a real security warning.** `npm audit` flagged a high-severity
+  vulnerability in `sharp` (an image library Next.js uses internally,
+  unrelated to anything we wrote). Patched it with a version override
+  without touching Next.js itself; verified 0 vulnerabilities afterward.
+
+**Still open / not started:**
+
+- Interactive price history chart (the "drag your finger and the price
+  updates" idea) — needs real historical price data we don't have yet.
+  Waiting on Josh hearing back from TCGplayer about their API before
+  deciding how to build this honestly.
+- One Piece cards can already live in real inventory/collection, but
+  Search still has no live pricing source for them — only Pokémon is
+  wired up (no free/official source found yet for One Piece).
+- Card images sometimes showing the card back instead of the front —
+  still open, waiting on a screenshot from Josh to diagnose properly
+  rather than guessing.
+- Everything from the prior "Unfinished / not started" list below is
+  still unfinished: automatic card recognition, scan → inventory saving,
+  Market/Social/Profile tabs, sales/POS, consignment payouts,
+  storefront/Stripe, PWA.
+
+**Known problems / gotchas for the next session:**
+
+- All the standing gotchas from the entry below still apply (branch
+  restart after a squash-merge, signed commits, no local database/no
+  Docker in this sandbox — DB tests only run in CI).
+- The Miami Vice colors and the rearranged layout are both first passes
+  Josh reacted to positively in chat, but hasn't seen live and clicked
+  through yet — worth a proper look together next session before
+  considering either "final."
+
+**Suggested next session:** get Josh's "merge" on PR #12, then pick
+between (1) hearing back from TCGplayer and building real price history,
+(2) a live pricing source for One Piece, or (3) scan → inventory saving.
+
 ## 2026-07-21 (live-testing round) — First real Vercel deploy + fixes from Josh's live feedback
 
 Josh got the app deployed to Vercel for the first time and tested it live —
