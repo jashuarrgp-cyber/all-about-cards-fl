@@ -236,6 +236,7 @@ function mapCard(raw: unknown): PriceableCard | null {
     setSeries: typeof set.series === 'string' ? set.series : null,
     rarity: typeof r.rarity === 'string' ? r.rarity : null,
     imageSmall: typeof images.small === 'string' ? images.small : null,
+    imageLarge: typeof images.large === 'string' ? images.large : null,
     marketPrice: pickMarketPrice(r.tcgplayer),
   };
 }

@@ -169,4 +169,82 @@ describe('SearchScreen', () => {
     fireEvent.click(screen.getByText('‹ Sets'));
     expect(screen.getByText('Browse by set')).toBeTruthy();
   });
+
+  it('opens a card detail view on tap, without an Add to Collection section when no handler is given', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ json: async () => SUCCESS_BODY }),
+    );
+
+    render(<SearchScreen />);
+    fireEvent.change(screen.getByLabelText('Search for a Pokémon card'), {
+      target: { value: 'pikachu' },
+    });
+    await waitFor(() => expect(screen.getByText('$2.10')).toBeTruthy());
+
+    fireEvent.click(screen.getAllByText('Pikachu')[0]);
+
+    expect(screen.getByRole('heading', { name: 'Pikachu' })).toBeTruthy();
+    expect(screen.getByText('Live market price')).toBeTruthy();
+    expect(screen.queryByText('Add to your collection')).toBeNull();
+
+    fireEvent.click(screen.getByText('‹ Back'));
+    expect(screen.getByLabelText('Search for a Pokémon card')).toBeTruthy();
+  });
+
+  it('adds a card to the collection and shows a success message', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ json: async () => SUCCESS_BODY }),
+    );
+    const onAddToCollection = vi.fn().mockResolvedValue({ ok: true });
+
+    render(<SearchScreen onAddToCollection={onAddToCollection} />);
+    fireEvent.change(screen.getByLabelText('Search for a Pokémon card'), {
+      target: { value: 'pikachu' },
+    });
+    await waitFor(() => expect(screen.getByText('$2.10')).toBeTruthy());
+    fireEvent.click(screen.getAllByText('Pikachu')[0]);
+
+    expect(screen.getByText('Add to your collection')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Increase quantity' }));
+    fireEvent.change(screen.getByLabelText('What did you pay for this card'), {
+      target: { value: '12.50' },
+    });
+    fireEvent.click(screen.getByText('Add to Collection'));
+
+    await waitFor(() =>
+      expect(screen.getByText('Added to your collection.')).toBeTruthy(),
+    );
+    expect(onAddToCollection).toHaveBeenCalledWith(
+      expect.objectContaining({
+        externalId: 'swsh7-8',
+        name: 'Pikachu',
+        quantity: 2,
+        acquisitionUnitCost: '12.50',
+      }),
+    );
+  });
+
+  it('shows an error message when adding to the collection fails', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({ json: async () => SUCCESS_BODY }),
+    );
+    const onAddToCollection = vi
+      .fn()
+      .mockResolvedValue({ ok: false, error: 'Something went wrong.' });
+
+    render(<SearchScreen onAddToCollection={onAddToCollection} />);
+    fireEvent.change(screen.getByLabelText('Search for a Pokémon card'), {
+      target: { value: 'pikachu' },
+    });
+    await waitFor(() => expect(screen.getByText('$2.10')).toBeTruthy());
+    fireEvent.click(screen.getAllByText('Pikachu')[0]);
+    fireEvent.click(screen.getByText('Add to Collection'));
+
+    await waitFor(() =>
+      expect(screen.getByText('Something went wrong.')).toBeTruthy(),
+    );
+  });
 });

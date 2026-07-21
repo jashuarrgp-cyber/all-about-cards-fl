@@ -87,6 +87,10 @@ describe('searchPokemonCards', () => {
     expect(pikachu.setName).toBe('Evolving Skies');
     expect(pikachu.number).toBe('8');
     expect(pikachu.marketPrice).toBe(2.1); // holofoil beats normal
+    expect(pikachu.imageSmall).toBe('https://images.pokemontcg.io/swsh7/8.png');
+    expect(pikachu.imageLarge).toBe(
+      'https://images.pokemontcg.io/swsh7/8_hires.png',
+    );
 
     const alakazam = result.cards[1];
     expect(alakazam.marketPrice).toBeNull();

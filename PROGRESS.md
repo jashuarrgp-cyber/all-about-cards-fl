@@ -3,6 +3,54 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (live-testing round) — First real Vercel deploy + fixes from Josh's live feedback
+
+Josh got the app deployed to Vercel for the first time and tested it live —
+this is the first round of feedback from real usage instead of my own
+verification inside this sandbox (which has no internet access).
+
+- **Fixed the Vercel build crash.** Root cause: nothing told a fresh
+  `npm install` to regenerate the Prisma Client, so Vercel's clean install
+  never had one. Added a `postinstall` script. Verified by reproducing the
+  exact failure locally (deleted the generated client, fresh install with
+  zero env vars, confirmed the build then succeeds) and confirmed for real
+  on Vercel's own infrastructure once pushed — build went from failing to
+  "Ready."
+- **Cleared up a repo mix-up.** Josh's earlier deploy was pointed at a
+  different, nearly-empty GitHub repo (`all-about-cards-fl-v2`, one commit,
+  a completely different older codebase) — not this one. All of today's
+  work is verifiably in `all-about-cards-fl` (checked directly). Flagging
+  here in case it comes up again.
+- **Fixed missing prices on some real cards.** My variant-name list for
+  picking a card's price was guessed from memory (never checked against a
+  real response, since this sandbox can't reach the internet) and missed
+  older/historical print-variant names. Now falls back to any priced
+  variant instead of only a fixed list.
+- **Made card images fail gracefully.** If an image URL doesn't load, it
+  now falls back to the placeholder box instead of leaving a blank gap.
+- **Added tapping a card → detail view → Add to Collection**, per Josh's
+  request. Tap any search result to see a full detail screen (bigger
+  image, set/series/number/rarity, price). On the real authenticated
+  `/app/search` page, a "Add to Collection" section lets you set a
+  quantity and optionally enter what you paid, then writes a real
+  inventory record — reusing the same audited `receiveQuantityInventory()`
+  path the rest of the inventory system already uses, not a separate
+  ad-hoc write. Cost is never guessed from the market price — left blank
+  it's stored as $0, clearly editable later, never silently invented.
+  The public `/preview/search` page intentionally does not get this
+  button — no login there, so no write access.
+- Open question: Josh reported some card images showing the card back
+  instead of the front artwork. Waiting on a screenshot to diagnose —
+  didn't want to guess-fix something that might be a data quirk in the
+  source rather than a bug in this code.
+- Verified: typecheck, lint, 39 unit/integration tests (3 new provider
+  tests, 3 new component tests for the detail/add flow, plus a new
+  DB-backed integration test suite for the write path that runs in CI —
+  no database reachable in this sandbox to run it here), production
+  build, and a real-browser check of the actual built app using request
+  interception to feed it realistic data (confirmed the Add to Collection
+  section correctly does NOT appear on the public preview).
+
 ## 2026-07-21 (later still) — Made sure live prices actually stay live
 
 Josh asked "make sure the prices update." Checked for anything that could

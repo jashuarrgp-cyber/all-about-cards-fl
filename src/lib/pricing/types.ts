@@ -9,6 +9,7 @@ export interface PriceableCard {
   setSeries: string | null;
   rarity: string | null;
   imageSmall: string | null;
+  imageLarge: string | null;
   /** Public market price in USD, or null when the provider has none for this card. */
   marketPrice: number | null;
 }
