@@ -184,19 +184,9 @@ function CardDetailView({
         ‹ Back
       </button>
 
-      <div className="mt-4 lg:grid lg:grid-cols-[300px_1fr] lg:items-start lg:gap-10">
-        <div className="flex justify-center lg:sticky lg:top-24 lg:block">
-          <CardThumb
-            src={card.imageLarge ?? card.imageSmall}
-            alt={card.name}
-            width={280}
-            height={391}
-            className="w-full max-w-[220px] rounded-2xl object-contain lg:max-w-none"
-          />
-        </div>
-
-        <div className="mt-4 flex flex-col items-center text-center lg:mt-0 lg:items-start lg:text-left">
-          <h1 className="text-xl font-bold text-white">{card.name}</h1>
+      <div className="mt-4 lg:grid lg:grid-cols-[1fr_280px] lg:items-start lg:gap-10">
+        <div>
+          <h1 className="text-2xl font-bold text-white">{card.name}</h1>
           <p className="mt-1 text-sm text-slate-400">
             {card.setName}
             {card.setSeries ? ` · ${card.setSeries}` : ''}
@@ -207,40 +197,34 @@ function CardDetailView({
               .join(' · ')}
           </p>
 
-          <div className="mt-4 w-full max-w-sm overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] lg:max-w-md">
-            <div className="px-6 py-4 text-center">
-              {card.marketPrice !== null ? (
-                <>
-                  <div className="text-3xl font-bold tabular-nums text-white">
-                    {formatUsd2(card.marketPrice)}
-                  </div>
-                  <div className="mt-1 text-[11px] text-slate-500">
-                    Live market price · TCGplayer
-                  </div>
-                </>
-              ) : (
-                <div className="text-sm text-slate-500">Price unavailable</div>
-              )}
-            </div>
+          <div className="mt-5 rounded-3xl border border-white/5 bg-gradient-to-br from-brand-pink/15 via-white/[0.02] to-transparent p-6">
+            {card.marketPrice !== null ? (
+              <>
+                <div className="text-4xl font-bold tabular-nums text-white">
+                  {formatUsd2(card.marketPrice)}
+                </div>
+                <div className="mt-1 text-[11px] text-slate-500">
+                  Live market price · TCGplayer
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-slate-500">Price unavailable</div>
+            )}
 
             {(card.priceLow !== null || card.priceHigh !== null) && (
-              <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
-                <div className="px-3 py-2.5 text-center">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    Low
-                  </div>
-                  <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300">
+                  Low{' '}
+                  <span className="text-white">
                     {card.priceLow !== null ? formatUsd2(card.priceLow) : '—'}
-                  </div>
-                </div>
-                <div className="px-3 py-2.5 text-center">
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                    High
-                  </div>
-                  <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                  </span>
+                </span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300">
+                  High{' '}
+                  <span className="text-white">
                     {card.priceHigh !== null ? formatUsd2(card.priceHigh) : '—'}
-                  </div>
-                </div>
+                  </span>
+                </span>
               </div>
             )}
 
@@ -249,7 +233,7 @@ function CardDetailView({
                 href={card.tcgplayerUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-pink"
+                className="mt-4 inline-block text-xs font-semibold text-brand-pink"
               >
                 Full price history &amp; recent sales on TCGplayer ↗
               </a>
@@ -257,7 +241,7 @@ function CardDetailView({
           </div>
 
           {onAddToCollection && (
-            <div className="mt-6 w-full max-w-sm rounded-3xl border border-white/5 bg-white/[0.03] p-5 text-left lg:max-w-md">
+            <div className="mt-6 rounded-3xl border border-brand-pink/20 bg-brand-pink/[0.04] p-5 text-left">
               {status === 'done' ? (
                 <div className="text-center">
                   <p className="text-sm font-semibold text-brand-up">
@@ -331,6 +315,16 @@ function CardDetailView({
               )}
             </div>
           )}
+        </div>
+
+        <div className="mt-6 flex justify-center lg:mt-0 lg:sticky lg:top-10 lg:justify-end">
+          <CardThumb
+            src={card.imageLarge ?? card.imageSmall}
+            alt={card.name}
+            width={220}
+            height={307}
+            className="w-full max-w-[180px] rounded-2xl object-contain shadow-[0_0_40px_-8px_theme(colors.brand.pink/40%)] lg:max-w-none"
+          />
         </div>
       </div>
     </div>
