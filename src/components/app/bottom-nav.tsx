@@ -20,7 +20,12 @@ type NavItem = {
 
 const ITEMS: NavItem[] = [
   { href: '/app/search', label: 'Search', Icon: SearchIcon },
-  { href: '/app/collection', label: 'Collection', Icon: CollectionIcon },
+  {
+    href: '/app/collection',
+    label: 'Collection',
+    Icon: CollectionIcon,
+    match: ['/app/scan'],
+  },
   {
     href: '/app/portfolio',
     label: 'Portfolio',

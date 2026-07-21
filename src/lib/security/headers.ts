@@ -8,8 +8,10 @@ export const securityHeaders = [
   { key: 'X-Frame-Options', value: 'DENY' },
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   {
+    // Camera is allowed for this origin only: the card scanner and AI
+    // Centering capture run on-device. Microphone and geolocation stay off.
     key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
+    value: 'camera=(self), microphone=(), geolocation=()',
   },
 ];
 export function isSafeRedirect(path: string) {
