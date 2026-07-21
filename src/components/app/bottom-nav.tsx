@@ -2,47 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  ChartIcon,
-  CollectionIcon,
-  PeopleIcon,
-  ProfileIcon,
-  SearchIcon,
-} from './icons';
+import { NAV_ITEMS } from './nav-items';
 
-type NavItem = {
-  href: string;
-  label: string;
-  Icon: (props: React.SVGProps<SVGSVGElement>) => React.ReactElement;
-  /** Extra path prefixes that should also mark this item active. */
-  match?: string[];
-};
-
-const ITEMS: NavItem[] = [
-  { href: '/app/search', label: 'Search', Icon: SearchIcon },
-  {
-    href: '/app/collection',
-    label: 'Collection',
-    Icon: CollectionIcon,
-    match: ['/app/scan'],
-  },
-  {
-    href: '/app/portfolio',
-    label: 'Portfolio',
-    Icon: ChartIcon,
-    match: ['/app/market', '/app/ai-centering'],
-  },
-  { href: '/app/social', label: 'Social', Icon: PeopleIcon },
-  { href: '/app/profile', label: 'Profile', Icon: ProfileIcon },
-];
+// Mobile-only: a persistent bottom tab bar. Hidden on wide screens, where
+// TopNav takes over the exact same tabs instead.
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-white/5 bg-base-950/85 backdrop-blur">
+    <nav className="sticky bottom-0 z-20 border-t border-white/5 bg-base-950/85 backdrop-blur lg:hidden">
       <ul className="mx-auto flex max-w-md items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] pt-2">
-        {ITEMS.map(({ href, label, Icon, match }) => {
+        {NAV_ITEMS.map(({ href, label, Icon, match }) => {
           const active =
             pathname === href ||
             pathname.startsWith(`${href}/`) ||

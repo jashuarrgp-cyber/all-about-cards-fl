@@ -184,150 +184,155 @@ function CardDetailView({
         ‹ Back
       </button>
 
-      <div className="mt-4 flex flex-col items-center">
-        <CardThumb
-          src={card.imageLarge ?? card.imageSmall}
-          alt={card.name}
-          width={220}
-          height={307}
-          className="w-full max-w-[220px] rounded-2xl object-contain"
-        />
-        <h1 className="mt-4 text-center text-xl font-bold text-white">
-          {card.name}
-        </h1>
-        <p className="mt-1 text-center text-sm text-slate-400">
-          {card.setName}
-          {card.setSeries ? ` · ${card.setSeries}` : ''}
-        </p>
-        <p className="text-center text-xs text-slate-500">
-          {[card.number ? `#${card.number}` : null, card.rarity]
-            .filter(Boolean)
-            .join(' · ')}
-        </p>
+      <div className="mt-4 lg:grid lg:grid-cols-[300px_1fr] lg:items-start lg:gap-10">
+        <div className="flex justify-center lg:sticky lg:top-24 lg:block">
+          <CardThumb
+            src={card.imageLarge ?? card.imageSmall}
+            alt={card.name}
+            width={280}
+            height={391}
+            className="w-full max-w-[220px] rounded-2xl object-contain lg:max-w-none"
+          />
+        </div>
 
-        <div className="mt-4 w-full overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03]">
-          <div className="px-6 py-4 text-center">
-            {card.marketPrice !== null ? (
-              <>
-                <div className="text-3xl font-bold tabular-nums text-white">
-                  {formatUsd2(card.marketPrice)}
+        <div className="mt-4 flex flex-col items-center text-center lg:mt-0 lg:items-start lg:text-left">
+          <h1 className="text-xl font-bold text-white">{card.name}</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {card.setName}
+            {card.setSeries ? ` · ${card.setSeries}` : ''}
+          </p>
+          <p className="text-xs text-slate-500">
+            {[card.number ? `#${card.number}` : null, card.rarity]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+
+          <div className="mt-4 w-full max-w-sm overflow-hidden rounded-2xl border border-white/5 bg-white/[0.03] lg:max-w-md">
+            <div className="px-6 py-4 text-center">
+              {card.marketPrice !== null ? (
+                <>
+                  <div className="text-3xl font-bold tabular-nums text-white">
+                    {formatUsd2(card.marketPrice)}
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    Live market price · TCGplayer
+                  </div>
+                </>
+              ) : (
+                <div className="text-sm text-slate-500">Price unavailable</div>
+              )}
+            </div>
+
+            {(card.priceLow !== null || card.priceHigh !== null) && (
+              <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
+                <div className="px-3 py-2.5 text-center">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Low
+                  </div>
+                  <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                    {card.priceLow !== null ? formatUsd2(card.priceLow) : '—'}
+                  </div>
                 </div>
-                <div className="mt-1 text-[11px] text-slate-500">
-                  Live market price · TCGplayer
+                <div className="px-3 py-2.5 text-center">
+                  <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    High
+                  </div>
+                  <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
+                    {card.priceHigh !== null ? formatUsd2(card.priceHigh) : '—'}
+                  </div>
                 </div>
-              </>
-            ) : (
-              <div className="text-sm text-slate-500">Price unavailable</div>
+              </div>
+            )}
+
+            {card.tcgplayerUrl && (
+              <a
+                href={card.tcgplayerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-teal"
+              >
+                Full price history &amp; recent sales on TCGplayer ↗
+              </a>
             )}
           </div>
 
-          {(card.priceLow !== null || card.priceHigh !== null) && (
-            <div className="grid grid-cols-2 divide-x divide-white/5 border-t border-white/5">
-              <div className="px-3 py-2.5 text-center">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  Low
+          {onAddToCollection && (
+            <div className="mt-6 w-full max-w-sm rounded-3xl border border-white/5 bg-white/[0.03] p-5 text-left lg:max-w-md">
+              {status === 'done' ? (
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-brand-up">
+                    Added to your collection.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950"
+                  >
+                    Back to search
+                  </button>
                 </div>
-                <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
-                  {card.priceLow !== null ? formatUsd2(card.priceLow) : '—'}
-                </div>
-              </div>
-              <div className="px-3 py-2.5 text-center">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  High
-                </div>
-                <div className="mt-0.5 text-sm font-semibold tabular-nums text-white">
-                  {card.priceHigh !== null ? formatUsd2(card.priceHigh) : '—'}
-                </div>
-              </div>
+              ) : (
+                <>
+                  <h2 className="text-sm font-semibold text-white">
+                    Add to your collection
+                  </h2>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm text-slate-400">Quantity</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        aria-label="Decrease quantity"
+                        className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums text-white">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => q + 1)}
+                        aria-label="Increase quantity"
+                        className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <label className="mt-3 block">
+                    <span className="text-sm text-slate-400">
+                      What did you pay? (optional — you can update this later)
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={cost}
+                      onChange={(e) => setCost(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[15px] text-white placeholder:text-slate-500 focus:outline-none"
+                      aria-label="What did you pay for this card"
+                    />
+                  </label>
+                  {status === 'error' && (
+                    <p className="mt-3 text-xs text-amber-200">
+                      {errorMessage}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={status === 'saving'}
+                    className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950 disabled:opacity-50"
+                  >
+                    {status === 'saving' ? 'Adding…' : 'Add to Collection'}
+                  </button>
+                </>
+              )}
             </div>
-          )}
-
-          {card.tcgplayerUrl && (
-            <a
-              href={card.tcgplayerUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="block border-t border-white/5 px-4 py-3 text-center text-xs font-semibold text-brand-teal"
-            >
-              Full price history &amp; recent sales on TCGplayer ↗
-            </a>
           )}
         </div>
       </div>
-
-      {onAddToCollection && (
-        <div className="mt-6 rounded-3xl border border-white/5 bg-white/[0.03] p-5">
-          {status === 'done' ? (
-            <div className="text-center">
-              <p className="text-sm font-semibold text-brand-up">
-                Added to your collection.
-              </p>
-              <button
-                type="button"
-                onClick={onBack}
-                className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950"
-              >
-                Back to search
-              </button>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-sm font-semibold text-white">
-                Add to your collection
-              </h2>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-sm text-slate-400">Quantity</span>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    aria-label="Decrease quantity"
-                    className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
-                  >
-                    −
-                  </button>
-                  <span className="w-6 text-center text-sm font-semibold tabular-nums text-white">
-                    {quantity}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setQuantity((q) => q + 1)}
-                    aria-label="Increase quantity"
-                    className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-              <label className="mt-3 block">
-                <span className="text-sm text-slate-400">
-                  What did you pay? (optional — you can update this later)
-                </span>
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={cost}
-                  onChange={(e) => setCost(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[15px] text-white placeholder:text-slate-500 focus:outline-none"
-                  aria-label="What did you pay for this card"
-                />
-              </label>
-              {status === 'error' && (
-                <p className="mt-3 text-xs text-amber-200">{errorMessage}</p>
-              )}
-              <button
-                type="button"
-                onClick={handleAdd}
-                disabled={status === 'saving'}
-                className="mt-4 w-full rounded-2xl bg-brand-teal py-3 text-sm font-bold text-base-950 disabled:opacity-50"
-              >
-                {status === 'saving' ? 'Adding…' : 'Add to Collection'}
-              </button>
-            </>
-          )}
-        </div>
-      )}
     </div>
   );
 }
@@ -492,7 +497,7 @@ export function SearchScreen({
             </p>
           )}
           {sets && sets.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {sets.map((set) => (
                 <SetTile key={set.id} set={set} onSelect={setActiveSet} />
               ))}
