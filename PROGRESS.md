@@ -3,6 +3,79 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-22 — Merged the big PR, wrote the retail vision, started the time clock
+
+Big day. The whole prior session's work went live, we planned the retail
+feature set, and we started building the first of it.
+
+**Finished today:**
+
+- **Merged PR #12 into `main`** with Josh's approval — so all of this is
+  now live on the main branch: the live card detail page, responsive
+  desktop layout, Miami Vice colors, the DeckTradr-differentiated layout,
+  real Google sign-in + auto owner bootstrap, the flaky-test and security
+  fixes, and the setup guide.
+- **Wrote the retail-operations feature set into `PROJECT_VISION.md`** —
+  Features A–F (employee time clock, scan-to-checkout, trade-in workflow,
+  multi-channel listing, multi-channel delisting, owner/GM dashboards),
+  the seven approved counter simplifications (incl. manager approval
+  showing the actual cards in/out), and a rewritten single roadmap that
+  folds in every pending item. Researched the real API situation: eBay's
+  seller API is open; TCGplayer closed new API applications in late 2024
+  (so a CSV fallback is planned); the website channel depends on its
+  platform (open question).
+- **Fixed the preview dead-ends** and **made every tab walkable** in the
+  public preview (added Market/Social/Profile preview pages), so the
+  design can be clicked through end to end with no sign-in bounce.
+- **Started Feature A — employee time clock:**
+  - Data model `TimeClockEvent` (append-only, auditable; a `seq` column
+    gives strict ordering) + migration.
+  - A pure state machine (clock in/out/break rules, friendly error
+    messages, hours math) and a DB-backed service with in-transaction
+    validation. 8 new unit tests; a DB integration test that runs in CI.
+  - A visible **owner Team dashboard** (reached via the Profile tab in the
+    preview): who's on the clock, hours today/week, and per-employee
+    buys/sales/trades with cost & profit — all clearly-labeled sample
+    staff. Plus an **interactive time-clock widget** that drives the real
+    state machine (tap Clock in → it flips state and swaps the buttons).
+
+**Unfinished / paused:**
+
+- **Real login is PAUSED until tonight** (Josh's call). The 3 setup steps
+  (Google app + database + Vercel settings) are his to do; then we run the
+  two DB commands together. Guide is `docs/SETUP_LOGIN.md`.
+- **Feature A still needs:** the real register clock-in screen with a
+  4-digit PIN, and auto-tagging every buy/sale/trade to whoever's clocked
+  in. The owner Team view is sample-only until login + that wiring exist.
+- **Not opened as a PR yet:** the time-clock + team work sits on the
+  working branch. Josh hasn't decided whether to open a PR for it.
+- Rest of the retail set (B–F) and the earlier loose ends (One Piece
+  pricing, price-history chart pending TCGplayer, the card-back image
+  issue) are still open — see the roadmap in `PROJECT_VISION.md`.
+
+**Known problems / gotchas for next session:**
+
+- **CI only runs the full database checks on a pull request (or a push to
+  `main`)** — a plain push to the working branch does NOT trigger them.
+  So the new time-clock **integration test hasn't run in CI yet**; it's
+  verified locally only (typecheck, lint, 46 unit tests, build). Opening a
+  PR for this work is the way to get it CI-verified.
+- All prior gotchas still hold: restart the branch from `origin/main`
+  after a squash-merge (done today); signed commits; no database or
+  outbound internet in this sandbox.
+- Login isn't on, so the real `/app/*` pages redirect to sign-in; only the
+  public `/preview/*` pages work for now.
+
+**Suggested next session:**
+
+1. Do the login setup with Josh (his 3 steps, then the 2 DB commands
+   together) — unblocks real accounts, employees, and saved data.
+2. Decide whether to open a PR for the time-clock/team work so CI verifies
+   the database test, then continue Feature A: the PIN register clock-in
+   screen and transaction attribution.
+3. After that, either the tap-an-employee detail page or start Feature B
+   (scan-to-checkout).
+
 ## 2026-07-21 (end of session) — Card detail page, real desktop layout, new colors, and moving away from DeckTradr's look
 
 Everything below is in one open pull request, **PR #12**, not yet merged —
