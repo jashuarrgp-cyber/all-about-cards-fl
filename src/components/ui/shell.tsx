@@ -11,6 +11,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span>{businessConfig.displayName}</span>
         </Link>
         <nav className="flex gap-4 text-sm">
+          {/* The design preview needs no login and is the one door that
+              always opens today; Sign in / Workspace require an account,
+              which isn't wired up yet (see PROGRESS.md). */}
+          <Link href="/preview/portfolio" className="text-amber-200">
+            View preview
+          </Link>
           <Link href="/sign-in">Sign in</Link>
           <Link href="/app">Workspace</Link>
         </nav>
