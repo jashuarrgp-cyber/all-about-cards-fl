@@ -3,6 +3,142 @@
 Newest first. Keep entries short and plain. Update at the end of every
 working session.
 
+## 2026-07-21 (end of session) — Card detail page, real desktop layout, new colors, and moving away from DeckTradr's look
+
+Everything below is in one open pull request, **PR #12**, not yet merged —
+still waiting on Josh to say "merge." CI (typecheck, lint, all tests,
+security audit, production build) and Vercel are both green on the latest
+commit.
+
+**Finished today:**
+
+- **Tap a card → detail page → Add to Collection.** Search results are now
+  tappable. The detail page shows the full-size image, set/number/rarity,
+  live price, and — if you're logged in — a real "Add to Collection" form
+  (quantity + optional cost) that writes a real inventory record through
+  the same audited path the rest of inventory already uses. The public,
+  no-login preview page doesn't get the Add button, on purpose.
+- **Real price range + link to full history.** Added the card's real
+  low/high price band next to the market price, plus a real link out to
+  that exact card's TCGplayer page for full price history and recent
+  sales. We don't have a licensed source for historical price charts
+  ourselves, so rather than fake one, we link to the real thing. Josh is
+  waiting to hear back from TCGplayer about API access — once that's in,
+  we can revisit building our own chart.
+- **A real desktop layout.** Until today the whole app was a phone-width
+  column even in a full browser window. Now there's a proper computer
+  layout — a left sidebar for navigation, a wider content area — while
+  the phone experience (bottom tabs) is unchanged. Same features, same
+  data, either way.
+- **New color scheme — "Miami Vice."** Josh asked for a South
+  Beach/Miami Vice feel. Swapped the app's accent color from teal to hot
+  pink and the background from plain near-black to a deep purple-black,
+  kept green/red for portfolio gains/losses (that convention is too
+  useful to break). One central place controls this (`tailwind.config.ts`),
+  so it was a low-risk change even though it touches how the whole app
+  looks.
+- **Rearranged the layout so it isn't a look-alike of DeckTradr.** Josh
+  raised a fair concern: we'd been building screens by directly copying
+  the arrangement of DeckTradr's own screenshots (image-then-price on the
+  card page, a top nav bar on desktop), and that's a real look-alike risk
+  worth avoiding, separate from just picking different colors. Kept every
+  feature and every piece of data, but changed the arrangement: the card
+  page now leads with name + price (price in its own glowing pink card
+  with pill-shaped low/high badges) with the image moved lower and to the
+  side; the desktop nav became a left sidebar instead of a top bar; the
+  Portfolio screen's stat counts became pill chips instead of a boxed
+  grid, and "Most Valuable" became a list instead of horizontal-scrolling
+  cards. I'm not a lawyer and this isn't legal advice — just a genuine
+  effort to make the design our own rather than a close copy.
+- **Fixed a flaky test in CI.** Two integration test files were both
+  wiping the same shared database tables and racing each other when
+  Vitest ran them in parallel — passed in one CI step, failed in another,
+  same run, same commit. Forced test files to run one at a time so this
+  can't happen again for any future test file either.
+- **Fixed a real security warning.** `npm audit` flagged a high-severity
+  vulnerability in `sharp` (an image library Next.js uses internally,
+  unrelated to anything we wrote). Patched it with a version override
+  without touching Next.js itself; verified 0 vulnerabilities afterward.
+
+**Still open / not started:**
+
+- Interactive price history chart (the "drag your finger and the price
+  updates" idea) — needs real historical price data we don't have yet.
+  Waiting on Josh hearing back from TCGplayer about their API before
+  deciding how to build this honestly.
+- One Piece cards can already live in real inventory/collection, but
+  Search still has no live pricing source for them — only Pokémon is
+  wired up (no free/official source found yet for One Piece).
+- Card images sometimes showing the card back instead of the front —
+  still open, waiting on a screenshot from Josh to diagnose properly
+  rather than guessing.
+- Everything from the prior "Unfinished / not started" list below is
+  still unfinished: automatic card recognition, scan → inventory saving,
+  Market/Social/Profile tabs, sales/POS, consignment payouts,
+  storefront/Stripe, PWA.
+
+**Known problems / gotchas for the next session:**
+
+- All the standing gotchas from the entry below still apply (branch
+  restart after a squash-merge, signed commits, no local database/no
+  Docker in this sandbox — DB tests only run in CI).
+- The Miami Vice colors and the rearranged layout are both first passes
+  Josh reacted to positively in chat, but hasn't seen live and clicked
+  through yet — worth a proper look together next session before
+  considering either "final."
+
+**Suggested next session:** get Josh's "merge" on PR #12, then pick
+between (1) hearing back from TCGplayer and building real price history,
+(2) a live pricing source for One Piece, or (3) scan → inventory saving.
+
+## 2026-07-21 (live-testing round) — First real Vercel deploy + fixes from Josh's live feedback
+
+Josh got the app deployed to Vercel for the first time and tested it live —
+this is the first round of feedback from real usage instead of my own
+verification inside this sandbox (which has no internet access).
+
+- **Fixed the Vercel build crash.** Root cause: nothing told a fresh
+  `npm install` to regenerate the Prisma Client, so Vercel's clean install
+  never had one. Added a `postinstall` script. Verified by reproducing the
+  exact failure locally (deleted the generated client, fresh install with
+  zero env vars, confirmed the build then succeeds) and confirmed for real
+  on Vercel's own infrastructure once pushed — build went from failing to
+  "Ready."
+- **Cleared up a repo mix-up.** Josh's earlier deploy was pointed at a
+  different, nearly-empty GitHub repo (`all-about-cards-fl-v2`, one commit,
+  a completely different older codebase) — not this one. All of today's
+  work is verifiably in `all-about-cards-fl` (checked directly). Flagging
+  here in case it comes up again.
+- **Fixed missing prices on some real cards.** My variant-name list for
+  picking a card's price was guessed from memory (never checked against a
+  real response, since this sandbox can't reach the internet) and missed
+  older/historical print-variant names. Now falls back to any priced
+  variant instead of only a fixed list.
+- **Made card images fail gracefully.** If an image URL doesn't load, it
+  now falls back to the placeholder box instead of leaving a blank gap.
+- **Added tapping a card → detail view → Add to Collection**, per Josh's
+  request. Tap any search result to see a full detail screen (bigger
+  image, set/series/number/rarity, price). On the real authenticated
+  `/app/search` page, a "Add to Collection" section lets you set a
+  quantity and optionally enter what you paid, then writes a real
+  inventory record — reusing the same audited `receiveQuantityInventory()`
+  path the rest of the inventory system already uses, not a separate
+  ad-hoc write. Cost is never guessed from the market price — left blank
+  it's stored as $0, clearly editable later, never silently invented.
+  The public `/preview/search` page intentionally does not get this
+  button — no login there, so no write access.
+- Open question: Josh reported some card images showing the card back
+  instead of the front artwork. Waiting on a screenshot to diagnose —
+  didn't want to guess-fix something that might be a data quirk in the
+  source rather than a bug in this code.
+- Verified: typecheck, lint, 39 unit/integration tests (3 new provider
+  tests, 3 new component tests for the detail/add flow, plus a new
+  DB-backed integration test suite for the write path that runs in CI —
+  no database reachable in this sandbox to run it here), production
+  build, and a real-browser check of the actual built app using request
+  interception to feed it realistic data (confirmed the Add to Collection
+  section correctly does NOT appear on the public preview).
+
 ## 2026-07-21 (later still) — Made sure live prices actually stay live
 
 Josh asked "make sure the prices update." Checked for anything that could

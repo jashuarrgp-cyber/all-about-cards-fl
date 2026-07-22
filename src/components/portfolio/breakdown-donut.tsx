@@ -42,7 +42,7 @@ export function BreakdownDonut({ slices }: { slices: BreakdownSlice[] }) {
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="#171c25"
+            stroke="#2c1c49"
             strokeWidth={STROKE}
           />
           {arcs.map((arc) => (

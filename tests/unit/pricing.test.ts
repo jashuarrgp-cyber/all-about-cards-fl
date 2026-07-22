@@ -36,6 +36,24 @@ const HOLO_CARD = {
   },
 };
 
+// An older-era card priced only under a variant name our fixed priority
+// list doesn't enumerate (real cards use many historical print-variant
+// names — "unlimited", "1stEdition", etc.) — should still surface a price
+// via the fallback rather than reporting "Price unavailable".
+const UNKNOWN_VARIANT_CARD = {
+  id: 'base1-4',
+  name: 'Charizard',
+  number: '4',
+  rarity: 'Rare Holo',
+  set: { name: 'Base', series: 'Base' },
+  images: { small: 'https://images.pokemontcg.io/base1/4.png' },
+  tcgplayer: {
+    prices: {
+      unlimitedHolofoil: { low: 200, mid: 350, high: 900, market: 375.5 },
+    },
+  },
+};
+
 const NO_PRICE_CARD = {
   id: 'base1-1',
   name: 'Alakazam',
@@ -69,10 +87,34 @@ describe('searchPokemonCards', () => {
     expect(pikachu.setName).toBe('Evolving Skies');
     expect(pikachu.number).toBe('8');
     expect(pikachu.marketPrice).toBe(2.1); // holofoil beats normal
+    expect(pikachu.imageSmall).toBe('https://images.pokemontcg.io/swsh7/8.png');
+    expect(pikachu.imageLarge).toBe(
+      'https://images.pokemontcg.io/swsh7/8_hires.png',
+    );
+    expect(pikachu.priceLow).toBe(1.2);
+    expect(pikachu.priceHigh).toBe(8);
+    expect(pikachu.tcgplayerUrl).toBe(
+      'https://prices.pokemontcg.io/tcgplayer/swsh7-8',
+    );
 
     const alakazam = result.cards[1];
     expect(alakazam.marketPrice).toBeNull();
+    expect(alakazam.priceLow).toBeNull();
+    expect(alakazam.priceHigh).toBeNull();
+    expect(alakazam.tcgplayerUrl).toBeNull();
     expect(alakazam.setName).toBe('Base');
+  });
+
+  it('falls back to any priced variant when none of the common names match', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ data: [UNKNOWN_VARIANT_CARD] }));
+    const result = await searchPokemonCards('charizard', { fetchImpl });
+
+    expect(result.cards).toHaveLength(1);
+    expect(result.cards[0].marketPrice).toBe(375.5);
+    expect(result.cards[0].priceLow).toBe(200);
+    expect(result.cards[0].priceHigh).toBe(900);
   });
 
   it('builds the request URL with a wildcard name query and API key header', async () => {

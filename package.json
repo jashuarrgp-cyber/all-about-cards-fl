@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma generate",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
@@ -20,6 +21,7 @@
     "prisma:validate": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma validate",
     "prisma:generate": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma generate",
     "db:seed": "tsx prisma/seed.ts",
+    "prod:init": "tsx scripts/init-production.ts",
     "owner:bootstrap": "tsx scripts/bootstrap-owner.ts",
     "security:audit": "npm audit --audit-level=moderate",
     "prisma:migrate:dev": "prisma migrate dev",
@@ -56,6 +58,7 @@
     "vitest": "3.2.7"
   },
   "overrides": {
-    "postcss": "8.5.10"
+    "postcss": "8.5.10",
+    "sharp": ">=0.35.0"
   }
 }

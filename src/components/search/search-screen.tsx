@@ -8,51 +8,95 @@ import type {
   SetListResult,
   SetSummary,
 } from '@/lib/pricing/types';
+import type {
+  AddFromSearchInput,
+  AddFromSearchResult,
+} from '@/lib/collection/add-from-search';
 import { formatUsd2 } from '@/lib/format';
 import { SearchIcon } from '@/components/app/icons';
 
 // Live card search: type a Pokémon card name and get real market prices back
 // from the pricing API route, which calls the Pokémon TCG API server-side.
-// Also supports browsing by set — real set logos, release dates, and card
-// counts, from the same official source. Pokémon only for now — no similarly
-// clean official/free source exists yet for the other games in the catalog.
-// Never shows cost or profit — only the same public market price anyone can
-// see on the official service.
+// Also supports browsing by set, and tapping a card for a detail view with
+// an optional "Add to Collection" action. Pokémon only for now — no
+// similarly clean official/free source exists yet for the other games in
+// the catalog. Never shows cost or profit — only the same public market
+// price anyone can see on the official service.
 
 const DEBOUNCE_MS = 350;
 
-function PriceRow({ card }: { card: PriceableCard }) {
+/** Image that falls back to the placeholder box if the URL fails to load. */
+function CardThumb({
+  src,
+  alt,
+  width,
+  height,
+  className,
+}: {
+  src: string | null;
+  alt: string;
+  width: number;
+  height: number;
+  className: string;
+}) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
+    return <span className={`${className} bg-white/10`} />;
+  }
   return (
-    <li className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3">
-      {card.imageSmall ? (
-        <Image
+    <Image
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      unoptimized
+      onError={() => setFailed(true)}
+      className={className}
+    />
+  );
+}
+
+function PriceRow({
+  card,
+  onSelect,
+}: {
+  card: PriceableCard;
+  onSelect: (card: PriceableCard) => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => onSelect(card)}
+        className="flex w-full items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.03] p-3 text-left"
+      >
+        <CardThumb
           src={card.imageSmall}
           alt={card.name}
           width={40}
           height={56}
-          unoptimized
           className="h-14 w-10 shrink-0 rounded-md object-cover"
         />
-      ) : (
-        <span className="h-14 w-10 shrink-0 rounded-md bg-white/10" />
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-semibold text-white">
-          {card.name}
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold text-white">
+            {card.name}
+          </div>
+          <div className="truncate text-xs text-slate-500">
+            {card.setName}
+            {card.number ? ` · #${card.number}` : ''}
+            {card.rarity ? ` · ${card.rarity}` : ''}
+          </div>
         </div>
-        <div className="truncate text-xs text-slate-500">
-          {card.setName}
-          {card.number ? ` · #${card.number}` : ''}
-          {card.rarity ? ` · ${card.rarity}` : ''}
-        </div>
-      </div>
-      {card.marketPrice !== null ? (
-        <div className="shrink-0 text-sm font-bold tabular-nums text-white">
-          {formatUsd2(card.marketPrice)}
-        </div>
-      ) : (
-        <div className="shrink-0 text-xs text-slate-500">Price unavailable</div>
-      )}
+        {card.marketPrice !== null ? (
+          <div className="shrink-0 text-sm font-bold tabular-nums text-white">
+            {formatUsd2(card.marketPrice)}
+          </div>
+        ) : (
+          <div className="shrink-0 text-xs text-slate-500">
+            Price unavailable
+          </div>
+        )}
+      </button>
     </li>
   );
 }
@@ -76,20 +120,13 @@ function SetTile({
       onClick={() => onSelect(set)}
       className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-white/[0.03] p-4 text-center"
     >
-      {set.logo ? (
-        <Image
-          src={set.logo}
-          alt=""
-          width={96}
-          height={40}
-          unoptimized
-          className="h-10 w-24 object-contain"
-        />
-      ) : (
-        <span className="flex h-10 w-24 items-center justify-center rounded-md bg-white/10 text-xs text-slate-400">
-          {set.name.slice(0, 2).toUpperCase()}
-        </span>
-      )}
+      <CardThumb
+        src={set.logo}
+        alt=""
+        width={96}
+        height={40}
+        className="h-10 w-24 object-contain"
+      />
       <span className="line-clamp-2 text-xs font-semibold text-white">
         {set.name}
       </span>
@@ -102,12 +139,208 @@ function SetTile({
   );
 }
 
+function CardDetailView({
+  card,
+  onBack,
+  onAddToCollection,
+}: {
+  card: PriceableCard;
+  onBack: () => void;
+  onAddToCollection?: (
+    input: AddFromSearchInput,
+  ) => Promise<AddFromSearchResult>;
+}) {
+  const [quantity, setQuantity] = useState(1);
+  const [cost, setCost] = useState('');
+  const [status, setStatus] = useState<'idle' | 'saving' | 'done' | 'error'>(
+    'idle',
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleAdd = async () => {
+    if (!onAddToCollection) return;
+    setStatus('saving');
+    setErrorMessage(null);
+    const result = await onAddToCollection({
+      externalId: card.id,
+      name: card.name,
+      setName: card.setName,
+      cardNumber: card.number,
+      rarity: card.rarity,
+      quantity,
+      acquisitionUnitCost: cost.trim(),
+    });
+    if (result.ok) {
+      setStatus('done');
+    } else {
+      setStatus('error');
+      setErrorMessage(result.error ?? 'Could not add this to your collection.');
+    }
+  };
+
+  return (
+    <div>
+      <button type="button" onClick={onBack} className="text-sm text-slate-400">
+        ‹ Back
+      </button>
+
+      <div className="mt-4 lg:grid lg:grid-cols-[1fr_280px] lg:items-start lg:gap-10">
+        <div>
+          <h1 className="text-2xl font-bold text-white">{card.name}</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            {card.setName}
+            {card.setSeries ? ` · ${card.setSeries}` : ''}
+          </p>
+          <p className="text-xs text-slate-500">
+            {[card.number ? `#${card.number}` : null, card.rarity]
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+
+          <div className="mt-5 rounded-3xl border border-white/5 bg-gradient-to-br from-brand-pink/15 via-white/[0.02] to-transparent p-6">
+            {card.marketPrice !== null ? (
+              <>
+                <div className="text-4xl font-bold tabular-nums text-white">
+                  {formatUsd2(card.marketPrice)}
+                </div>
+                <div className="mt-1 text-[11px] text-slate-500">
+                  Live market price · TCGplayer
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-slate-500">Price unavailable</div>
+            )}
+
+            {(card.priceLow !== null || card.priceHigh !== null) && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300">
+                  Low{' '}
+                  <span className="text-white">
+                    {card.priceLow !== null ? formatUsd2(card.priceLow) : '—'}
+                  </span>
+                </span>
+                <span className="rounded-full bg-white/[0.06] px-3 py-1 text-xs font-semibold text-slate-300">
+                  High{' '}
+                  <span className="text-white">
+                    {card.priceHigh !== null ? formatUsd2(card.priceHigh) : '—'}
+                  </span>
+                </span>
+              </div>
+            )}
+
+            {card.tcgplayerUrl && (
+              <a
+                href={card.tcgplayerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-block text-xs font-semibold text-brand-pink"
+              >
+                Full price history &amp; recent sales on TCGplayer ↗
+              </a>
+            )}
+          </div>
+
+          {onAddToCollection && (
+            <div className="mt-6 rounded-3xl border border-brand-pink/20 bg-brand-pink/[0.04] p-5 text-left">
+              {status === 'done' ? (
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-brand-up">
+                    Added to your collection.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    className="mt-4 w-full rounded-2xl bg-brand-pink py-3 text-sm font-bold text-base-950"
+                  >
+                    Back to search
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-sm font-semibold text-white">
+                    Add to your collection
+                  </h2>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm text-slate-400">Quantity</span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                        aria-label="Decrease quantity"
+                        className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
+                      >
+                        −
+                      </button>
+                      <span className="w-6 text-center text-sm font-semibold tabular-nums text-white">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setQuantity((q) => q + 1)}
+                        aria-label="Increase quantity"
+                        className="h-8 w-8 rounded-full bg-white/[0.06] font-bold text-slate-300"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <label className="mt-3 block">
+                    <span className="text-sm text-slate-400">
+                      What did you pay? (optional — you can update this later)
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={cost}
+                      onChange={(e) => setCost(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-1.5 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-[15px] text-white placeholder:text-slate-500 focus:outline-none"
+                      aria-label="What did you pay for this card"
+                    />
+                  </label>
+                  {status === 'error' && (
+                    <p className="mt-3 text-xs text-amber-200">
+                      {errorMessage}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    disabled={status === 'saving'}
+                    className="mt-4 w-full rounded-2xl bg-brand-pink py-3 text-sm font-bold text-base-950 disabled:opacity-50"
+                  >
+                    {status === 'saving' ? 'Adding…' : 'Add to Collection'}
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 flex justify-center lg:mt-0 lg:sticky lg:top-10 lg:justify-end">
+          <CardThumb
+            src={card.imageLarge ?? card.imageSmall}
+            alt={card.name}
+            width={220}
+            height={307}
+            className="w-full max-w-[180px] rounded-2xl object-contain shadow-[0_0_40px_-8px_theme(colors.brand.pink/40%)] lg:max-w-none"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SearchScreen({
   endpoint = '/api/pricing/search',
   setsEndpoint = '/api/pricing/sets',
+  onAddToCollection,
 }: {
   endpoint?: string;
   setsEndpoint?: string;
+  onAddToCollection?: (
+    input: AddFromSearchInput,
+  ) => Promise<AddFromSearchResult>;
 }) {
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<CardSearchResult | null>(null);
@@ -117,6 +350,7 @@ export function SearchScreen({
   const [sets, setSets] = useState<SetSummary[] | null>(null);
   const [setsError, setSetsError] = useState<string | null>(null);
   const [activeSet, setActiveSet] = useState<SetSummary | null>(null);
+  const [activeCard, setActiveCard] = useState<PriceableCard | null>(null);
 
   // Load the browse-by-set list once, up front.
   useEffect(() => {
@@ -176,6 +410,18 @@ export function SearchScreen({
 
     return () => clearTimeout(handle);
   }, [query, activeSet, endpoint]);
+
+  if (activeCard) {
+    return (
+      <div className="pb-6 pt-5">
+        <CardDetailView
+          card={activeCard}
+          onBack={() => setActiveCard(null)}
+          onAddToCollection={onAddToCollection}
+        />
+      </div>
+    );
+  }
 
   const browsing = !query.trim() && !activeSet;
 
@@ -245,7 +491,7 @@ export function SearchScreen({
             </p>
           )}
           {sets && sets.length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {sets.map((set) => (
                 <SetTile key={set.id} set={set} onSelect={setActiveSet} />
               ))}
@@ -282,7 +528,7 @@ export function SearchScreen({
           ) : (
             <ul className="space-y-2">
               {result.cards.map((card) => (
-                <PriceRow key={card.id} card={card} />
+                <PriceRow key={card.id} card={card} onSelect={setActiveCard} />
               ))}
             </ul>
           )}

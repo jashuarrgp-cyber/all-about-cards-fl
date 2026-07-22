@@ -162,7 +162,7 @@ export function ScanScreen() {
               type="button"
               onClick={() => setStage('review')}
               disabled={count === 0}
-              className="rounded-full bg-brand-teal px-5 py-2.5 text-sm font-bold text-base-950 disabled:opacity-40"
+              className="rounded-full bg-brand-pink px-5 py-2.5 text-sm font-bold text-base-950 disabled:opacity-40"
             >
               Review {count} →
             </button>
@@ -353,7 +353,7 @@ export function ScanScreen() {
           <button
             type="button"
             onClick={() => setStage('scan')}
-            className="mt-4 w-full rounded-2xl bg-brand-teal py-3.5 text-[15px] font-bold text-base-950"
+            className="mt-4 w-full rounded-2xl bg-brand-pink py-3.5 text-[15px] font-bold text-base-950"
           >
             Keep scanning
           </button>

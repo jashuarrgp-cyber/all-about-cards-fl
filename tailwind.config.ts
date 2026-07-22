@@ -6,18 +6,20 @@ export default {
       colors: {
         ink: '#111827',
         gold: '#c89b3c',
-        // Collector UI palette (mobile app experience)
+        // Collector UI palette (mobile app experience) — Miami Vice-inspired:
+        // deep purple-black night backdrop, hot pink primary accent, neon
+        // green/coral for gains/losses.
         base: {
-          950: '#05070a',
-          900: '#0a0d12',
-          800: '#11151c',
-          700: '#171c25',
+          950: '#0a0616',
+          900: '#130c22',
+          800: '#1e1333',
+          700: '#2c1c49',
         },
         brand: {
-          green: '#34e08f',
-          teal: '#22d3b7',
-          up: '#3fe08f',
-          down: '#ff5d6c',
+          green: '#00f5a0',
+          pink: '#ff2e9f',
+          up: '#00f5a0',
+          down: '#ff3b5c',
         },
       },
       borderRadius: {

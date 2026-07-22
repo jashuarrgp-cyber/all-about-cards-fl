@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function CollectionPreviewPage() {
   return (
-    <MobileFrame>
-      <div className="rounded-b-2xl bg-brand-teal/10 px-4 py-1.5 text-center text-[11px] font-medium text-brand-teal">
+    <MobileFrame preview>
+      <div className="rounded-b-2xl bg-brand-pink/10 px-4 py-1.5 text-center text-[11px] font-medium text-brand-pink">
         Design preview · sample data
       </div>
       <CollectionScreen data={sampleCollection} scanHref="/preview/scan" />

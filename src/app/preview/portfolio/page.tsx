@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 
 export default function PortfolioPreviewPage() {
   return (
-    <MobileFrame>
-      <div className="rounded-b-2xl bg-brand-teal/10 px-4 py-1.5 text-center text-[11px] font-medium text-brand-teal">
+    <MobileFrame preview>
+      <div className="rounded-b-2xl bg-brand-pink/10 px-4 py-1.5 text-center text-[11px] font-medium text-brand-pink">
         Design preview · sample data
       </div>
-      <TopTabs active="portfolio" />
+      <TopTabs active="portfolio" preview />
       <div className="pt-6">
         <PortfolioScreen data={sampleSnapshot} />
       </div>

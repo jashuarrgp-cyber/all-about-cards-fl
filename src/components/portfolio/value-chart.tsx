@@ -91,12 +91,12 @@ export function ValueChart({
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="0%"
-                stopColor={up ? '#34e08f' : '#ff5d6c'}
+                stopColor={up ? '#00f5a0' : '#ff3b5c'}
                 stopOpacity="0.28"
               />
               <stop
                 offset="100%"
-                stopColor={up ? '#34e08f' : '#ff5d6c'}
+                stopColor={up ? '#00f5a0' : '#ff3b5c'}
                 stopOpacity="0"
               />
             </linearGradient>
@@ -105,7 +105,7 @@ export function ValueChart({
           <path
             d={line}
             fill="none"
-            stroke={up ? '#34e08f' : '#ff5d6c'}
+            stroke={up ? '#00f5a0' : '#ff3b5c'}
             strokeWidth={2}
             strokeLinejoin="round"
             strokeLinecap="round"
@@ -115,8 +115,8 @@ export function ValueChart({
             cx={high.x}
             cy={high.y}
             r={1.6}
-            fill="#05070a"
-            stroke={up ? '#34e08f' : '#ff5d6c'}
+            fill="#0a0616"
+            stroke={up ? '#00f5a0' : '#ff3b5c'}
             strokeWidth={1.4}
             vectorEffect="non-scaling-stroke"
           />

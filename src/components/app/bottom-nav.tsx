@@ -2,60 +2,53 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  ChartIcon,
-  CollectionIcon,
-  PeopleIcon,
-  ProfileIcon,
-  SearchIcon,
-} from './icons';
+import { NAV_ITEMS } from './nav-items';
 
-type NavItem = {
-  href: string;
-  label: string;
-  Icon: (props: React.SVGProps<SVGSVGElement>) => React.ReactElement;
-  /** Extra path prefixes that should also mark this item active. */
-  match?: string[];
-};
+// Mobile-only: a persistent bottom tab bar. Hidden on wide screens, where
+// SideNav takes over the exact same tabs instead. In `preview` mode the tabs
+// link to the public `/preview/*` pages (a signed-in session isn't required
+// there); tabs with no preview page are shown disabled so they can't dead-end
+// the visitor at a sign-in screen.
 
-const ITEMS: NavItem[] = [
-  { href: '/app/search', label: 'Search', Icon: SearchIcon },
-  {
-    href: '/app/collection',
-    label: 'Collection',
-    Icon: CollectionIcon,
-    match: ['/app/scan'],
-  },
-  {
-    href: '/app/portfolio',
-    label: 'Portfolio',
-    Icon: ChartIcon,
-    match: ['/app/market', '/app/ai-centering'],
-  },
-  { href: '/app/social', label: 'Social', Icon: PeopleIcon },
-  { href: '/app/profile', label: 'Profile', Icon: ProfileIcon },
-];
-
-export function BottomNav() {
+export function BottomNav({ preview = false }: { preview?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-white/5 bg-base-950/85 backdrop-blur">
+    <nav className="sticky bottom-0 z-20 border-t border-white/5 bg-base-950/85 backdrop-blur lg:hidden">
       <ul className="mx-auto flex max-w-md items-center justify-around px-2 pb-[env(safe-area-inset-bottom)] pt-2">
-        {ITEMS.map(({ href, label, Icon, match }) => {
-          const active =
-            pathname === href ||
-            pathname.startsWith(`${href}/`) ||
-            (match?.some((m) => pathname.startsWith(m)) ?? false);
+        {NAV_ITEMS.map(({ href, label, Icon, match, previewHref }) => {
+          const target = preview ? previewHref : href;
+
+          // In preview mode a tab with no preview page is shown but disabled.
+          if (preview && !target) {
+            return (
+              <li key={href}>
+                <span
+                  aria-disabled="true"
+                  title={`${label} isn't part of this preview`}
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-slate-700"
+                >
+                  <Icon aria-hidden />
+                </span>
+              </li>
+            );
+          }
+
+          const active = preview
+            ? pathname === target
+            : pathname === href ||
+              pathname.startsWith(`${href}/`) ||
+              (match?.some((m) => pathname.startsWith(m)) ?? false);
+
           return (
             <li key={href}>
               <Link
-                href={href}
+                href={target ?? href}
                 aria-label={label}
                 aria-current={active ? 'page' : undefined}
                 className={`flex h-11 w-11 items-center justify-center rounded-full transition ${
                   active
-                    ? 'text-brand-teal'
+                    ? 'text-brand-pink'
                     : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
