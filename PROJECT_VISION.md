@@ -222,6 +222,37 @@ Requirements:
   cost/profit-hiding rule from the design bar still holds: none of this
   internal money data ever appears on a customer- or collector-facing screen.
 
+### Counter simplifications (approved Jul 2026)
+
+Refinements approved by Josh to keep the counter flows one-step simple and
+safe. These apply across Features A–C and the approval flow.
+
+- **Quick "switch employee" PIN.** Hand the register to a coworker with a
+  tap-and-PIN instead of a full clock-out/clock-in, so buys, sales, and trades
+  stay tagged to the right person even when a register is shared.
+- **Park & resume a lot.** Pause an in-progress lot (customer steps away, the
+  phone rings) and pick it back up later without losing any scanned cards.
+- **Void / undo last action, reason logged.** One tap to fix a mis-scan or
+  cancel the last sale, instead of digging through menus. Every void records
+  who did it and why (auditable, never silent).
+- **Receipts.** Print a receipt for buys, trades, and sales, with an optional
+  text/email copy. (Hardware note: needs a receipt printer at the register.)
+- **Customer-facing view that hides cost/profit.** A "turn the screen around"
+  mode that shows only the offer and totals — never our cost or margin — so a
+  customer can look at the screen without seeing internal numbers.
+- **Manager approval on their phone, with the cards shown.** The over-threshold
+  approval request (Feature C) pings the manager's phone for a one-tap approve
+  — **and the request itemizes the actual cards involved**: each card, its
+  condition, and its value, clearly marked as coming **in** (buy/trade-in) or
+  going **out** (sale/trade-out). The manager sees exactly what they're
+  approving, not just a dollar total, and can approve or decline from their own
+  device. The itemized list is kept with the approval log.
+- **Don't-lose-work safety net.** If an employee forgets to clock out, the
+  system auto-clocks them out at close and flags it (never silently inflates
+  hours); and if the network drops mid-transaction, the sale/trade is queued
+  locally and synced when the connection returns, so nothing at the counter is
+  lost.
+
 ## Long-run roadmap (plain language)
 
 Phases 0–3 are built and merged. Phase 4 (the mobile shell + Portfolio) is
