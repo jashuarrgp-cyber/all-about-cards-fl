@@ -35,5 +35,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
+  events: {
+    // First-time owner bootstrap, no command line needed: when the account
+    // whose email matches INITIAL_OWNER_EMAIL is created, it is granted the
+    // OWNER role automatically. Everyone else starts with no role (they land
+    // on the "account needs enabling" page) until an owner grants access.
+    // Guarded by an env var and an exact email match, so a random visitor
+    // can never become owner.
+    async createUser({ user }) {
+      const ownerEmail = process.env.INITIAL_OWNER_EMAIL?.trim().toLowerCase();
+      if (!ownerEmail || !user.id) return;
+      if (user.email?.trim().toLowerCase() !== ownerEmail) return;
+
+      const ownerRole = await prisma.role.findUnique({
+        where: { name: 'OWNER' },
+      });
+      if (!ownerRole) return; // roles not seeded yet — nothing to grant
+
+      await prisma.userRole.upsert({
+        where: { userId_roleId: { userId: user.id, roleId: ownerRole.id } },
+        create: { userId: user.id, roleId: ownerRole.id },
+        update: {},
+      });
+    },
+  },
 });
 export const { GET, POST } = handlers;

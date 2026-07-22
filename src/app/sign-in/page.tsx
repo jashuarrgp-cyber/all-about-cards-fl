@@ -42,7 +42,7 @@ export default function SignInPage() {
           <p className="mt-3 text-slate-300">
             Sign-in isn&apos;t turned on for this site yet. Google sign-in
             switches on as soon as the one-time setup is finished (see
-            PROGRESS.md). In the meantime, the design preview is open to
+            docs/SETUP_LOGIN.md). In the meantime, the design preview is open to
             everyone — no account needed.
           </p>
         )}

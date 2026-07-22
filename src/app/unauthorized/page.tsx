@@ -13,8 +13,8 @@ export default function UnauthorizedPage() {
         <p className="mt-3 text-slate-300">
           Your account doesn&apos;t have access to this area yet. If this is
           your business account, it needs to be enabled once as the owner (see
-          PROGRESS.md); after that you&apos;ll go straight in. Customer spaces
-          arrive in a later phase.
+          docs/SETUP_LOGIN.md); after that you&apos;ll go straight in. Customer
+          spaces arrive in a later phase.
         </p>
       </div>
     </Shell>

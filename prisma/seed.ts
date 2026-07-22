@@ -1,28 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { rolePermissions } from '../src/lib/auth/permissions';
+import { seedRolesAndPermissions } from './roles-seed';
 const prisma = new PrismaClient();
 export async function seed(client = prisma) {
-  for (const [role, perms] of Object.entries(rolePermissions)) {
-    const dbRole = await client.role.upsert({
-      where: { name: role },
-      update: {},
-      create: { name: role },
-    });
-    for (const perm of perms) {
-      const dbPerm = await client.permission.upsert({
-        where: { name: perm },
-        update: {},
-        create: { name: perm },
-      });
-      await client.rolePermission.upsert({
-        where: {
-          roleId_permissionId: { roleId: dbRole.id, permissionId: dbPerm.id },
-        },
-        update: {},
-        create: { roleId: dbRole.id, permissionId: dbPerm.id },
-      });
-    }
-  }
+  await seedRolesAndPermissions(client);
   const [shelf, binder, secure] = await Promise.all([
     client.storageLocation.upsert({
       where: { code: 'WH-SHELF-A1' },
