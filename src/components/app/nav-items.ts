@@ -47,6 +47,16 @@ export const NAV_ITEMS: NavItem[] = [
     match: ['/app/market', '/app/ai-centering'],
     previewHref: '/preview/portfolio',
   },
-  { href: '/app/social', label: 'Social', Icon: PeopleIcon },
-  { href: '/app/profile', label: 'Profile', Icon: ProfileIcon },
+  {
+    href: '/app/social',
+    label: 'Social',
+    Icon: PeopleIcon,
+    previewHref: '/preview/social',
+  },
+  {
+    href: '/app/profile',
+    label: 'Profile',
+    Icon: ProfileIcon,
+    previewHref: '/preview/profile',
+  },
 ];

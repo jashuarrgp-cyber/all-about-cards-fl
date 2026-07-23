@@ -13,7 +13,12 @@ const TABS = [
     href: '/app/portfolio',
     previewHref: '/preview/portfolio',
   },
-  { key: 'market', label: 'Market', href: '/app/market' },
+  {
+    key: 'market',
+    label: 'Market',
+    href: '/app/market',
+    previewHref: '/preview/market',
+  },
   {
     key: 'ai-centering',
     label: 'AI Centering',

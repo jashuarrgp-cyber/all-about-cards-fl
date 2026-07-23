@@ -21,6 +21,9 @@ model User {
   auditLogs         AuditLog[]
   Purchase          Purchase[]
   InventoryMovement InventoryMovement[]
+
+  timeClockEvents         TimeClockEvent[] @relation("TimeClockUser")
+  recordedTimeClockEvents TimeClockEvent[] @relation("TimeClockRecordedBy")
 }
 
 model Account {
@@ -353,4 +356,35 @@ model InventoryMovement {
   @@index([quantityInventoryLotId])
   @@index([individualInventoryItemId])
   @@index([movementType])
+}
+
+// Employee time clock — an append-only stream of clock events. Corrections
+// are recorded as new events (with a note and the manager who made them),
+// never by editing history, so the record stays auditable like AuditLog.
+model TimeClockEvent {
+  // Strictly increasing insertion order. "Current state" is read from the
+  // highest seq, so two taps in the same millisecond can't be read out of
+  // order (occurredAt can even be backdated on a correction).
+  seq          Int                @unique @default(autoincrement())
+  id           String             @id @default(uuid())
+  userId       String
+  type         TimeClockEventType
+  occurredAt   DateTime           @default(now())
+  registerId   String?
+  note         String?
+  recordedById String?
+  createdAt    DateTime           @default(now())
+  user         User               @relation("TimeClockUser", fields: [userId], references: [id], onDelete: Cascade)
+  recordedBy   User?              @relation("TimeClockRecordedBy", fields: [recordedById], references: [id], onDelete: SetNull)
+
+  @@index([userId, seq])
+  @@index([occurredAt])
+  @@index([type])
+}
+
+enum TimeClockEventType {
+  CLOCK_IN
+  CLOCK_OUT
+  BREAK_START
+  BREAK_END
 }
