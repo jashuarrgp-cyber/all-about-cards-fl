@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "vercel-build": "bash scripts/vercel-build.sh",
     "start": "next start",
     "postinstall": "DATABASE_URL=${DATABASE_URL:-postgresql://aacfl:aacfl@localhost:5432/aacfl_test?schema=public} prisma generate",
     "lint": "eslint .",
